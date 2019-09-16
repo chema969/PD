@@ -1,0 +1,4 @@
+(define (sucesion_convergente_a_e x)
+  (expt (+ 1 (/ x)) x)
+  )
+
