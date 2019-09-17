@@ -17,17 +17,39 @@
 (define (farenheit_a_celsius oF)
   (/ (- oF 32)  1.8))
 
-(define (semiperimetro a b c)
-  (/ (+ a b c) 2))
+
 
 (define (areaTriangulo a b c)
+  (let(
+  (semiperimetro (/ (+ a b c) 2)))
   (sqrt
    (*
-    (semiperimetro a b c)
-    (- (semiperimetro a b c) a)
-    (- (semiperimetro a b c) b)
-    (- (semiperimetro a b c) c)
+    semiperimetro 
+    (- semiperimetro  a)
+    (- semiperimetro  b)
+    (- semiperimetro  c)
     )
    )
+   )
   )
-         
+
+(define (areaRombo diag1 diag2)
+  (/ (* diag1 diag2) 2))
+
+(define (areaTrapecio base1 base2 altura)
+  (* altura
+     (/ (+ base1 base2) 2)
+  )
+)
+
+(define (euclides x1 y1 x2 y2)
+  (sqrt
+   (+
+    (expt (- x1 x2) 2)
+    (expt (- y1 y2) 2)
+   )
+  )
+)
+
+(define (manhattan x1 y1 x2 y2)
+ (+ (abs (- x1 x2)) (abs (- y1 y2))))
