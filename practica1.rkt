@@ -115,15 +115,51 @@
    )
   )
 
+
+;; 
+;; Nombre: areaRombo
+;; Objetivo: Calcula el area del rombo dadas las diagonales 
+;; Parámetro:
+;;         diag1 : Primera diagonal
+;;         diag2 : Segunda diagonal
+;; Resultado: 
+;;         El area del rombo
+;; Funciones a las que llama: ninguna
+;;
 (define (areaRombo diag1 diag2)
   (/ (* diag1 diag2) 2))
 
+
+;; 
+;; Nombre: areaTrapecio
+;; Objetivo: Calcula el area del trapecio dada las bases y la altura
+;; Parámetro:
+;;         base1 : Primera base
+;;         base2 : Segunda base
+;;         altura: Altura del trapecio
+;; Resultado: 
+;;         El area del trapecio
+;; Funciones a las que llama: ninguna
+;;
 (define (areaTrapecio base1 base2 altura)
   (* altura
      (/ (+ base1 base2) 2)
   )
 )
 
+
+;; 
+;; Nombre: D2
+;; Objetivo: Calcula la distancia euclidea de dos puntos
+;; Parámetro:
+;;         x1 : Coordenada x del primer punto
+;;         y1 : Coordenada y del primer punto
+;;         x2 : Coordenada x del segundo punto
+;;         y2 : Coordenada y del segundo punto
+;; Resultado: 
+;;         La distancia euclidea entre los dos puntos
+;; Funciones a las que llama: ninguna
+;;
 (define (D2 x1 y1 x2 y2)
   (sqrt
    (+
@@ -133,10 +169,154 @@
   )
 )
 
+;; 
+;; Nombre: D2
+;; Objetivo: Calcula la distancia de Manhattan de dos puntos
+;; Parámetro:
+;;         x1 : Coordenada x del primer punto
+;;         y1 : Coordenada y del primer punto
+;;         x2 : Coordenada x del segundo punto
+;;         y2 : Coordenada y del segundo punto
+;; Resultado: 
+;;         La distancia de Manhattan entre los dos puntos
+;; Funciones a las que llama: ninguna
+;;
 (define (D1 x1 y1 x2 y2)
  (+ (abs (- x1 x2)) (abs (- y1 y2))))
 
+
+;; 
+;; Nombre: Dmax
+;; Objetivo: Calcula la distancia de Chebyshev de dos puntos
+;; Parámetro:
+;;         x1 : Coordenada x del primer punto
+;;         y1 : Coordenada y del primer punto
+;;         x2 : Coordenada x del segundo punto
+;;         y2 : Coordenada y del segundo punto
+;; Resultado: 
+;;         La distancia de Chebyshev entre los dos puntos
+;; Funciones a las que llama: ninguna
+;;
 (define (Dmax x1 y1 x2 y2)
   (max (abs (- x1 x2)) (abs (- y1 y2))))
 
-(define (areaTrianguloVertices
+
+;; 
+;; Nombre: areaTrianguloVertices
+;; Objetivo: Calcula el area de un triangulo a traves de sus vertices
+;; Parámetro:
+;;         x1 : Coordenada x del primer vertice del triangulo
+;;         y1 : Coordenada y del primer vertice del triangulo
+;;         x2 : Coordenada x del segundo vertice del triangulo
+;;         y2 : Coordenada y del segundo vertice del triangulo
+;;         x3 : Coordenada x del tercer vertice del triangulo
+;;         y3 : Coordenada y del tercer vertice del triangulo
+;; Resultado: 
+;;         El area de un triangulo
+;; Descripción:
+;;        Calcula la distancia euclídea entre los tres puntos y tras ello, calcula el area del triangulo con estos puntos
+;; Funciones a las que llama:
+;;         D2 : Función que calcula la distancia Euclídea de dos puntos
+;;         areaTriangulo : Función que calcula el área del triángulo dado sus lados
+;;
+(define (areaTrianguloVertices x1 y1 x2 y2 x3 y3)
+  (let(
+   (a (D2 x1 y1 x2 y2))
+   (b (D2 x1 y1 x3 y3))
+   (c (D2 x2 y2 x3 y3))
+  )
+    (areaTriangulo a b c)
+  )
+)
+
+;; 
+;; Nombre: areaRomboVertices
+;; Objetivo: Calcula el area de un rombo a traves de sus vertices
+;; Parámetro:
+;;         x1 : Coordenada x del primer punto de la primera diagonal del rombo
+;;         y1 : Coordenada y del primer punto de la primera diagonal del rombo
+;;         x2 : Coordenada x del segundo punto de la primera diagonal del rombo
+;;         y2 : Coordenada y del segundo punto de la primera diagonal del rombo
+;;         x3 : Coordenada x del primer punto de la segunda diagonal del rombo
+;;         y3 : Coordenada y del primer punto de la segunda diagonal del rombo
+;;         x4 : Coordenada x del segundo punto de la segunda diagonal del rombo
+;;         y4 : Coordenada y del segundo punto de la segunda diagonal del rombo
+;; Resultado: 
+;;         El area de un rombo
+;; Descripción:
+;;        Calcula la distancia euclídea entre las dos diagonales del rombo y tras ello, calcula el area del rombo con esas diagonales
+;; Funciones a las que llama:
+;;         D2 : Función que calcula la distancia Euclídea de dos puntos
+;;         areaRombo : Función que calcula el área de un rombo dada sus diagonales
+;;
+(define (areaRomboVertices x1 y1 x2 y2 x3 y3 x4 y4)
+  (let(
+   (a (D2 x1 y1 x2 y2))
+   (b (D2 x3 y3 x4 y4))
+   )
+    (areaRombo a b)
+   )
+)
+
+;; 
+;; Nombre: distanciaPuntoRecta
+;; Objetivo: Calcula la distancia entre un punto y una recta
+;; Parámetro:
+;;         x : Coordenada x del punto
+;;         y : Coordenada y del punto
+;;         a : Valor de la a por el que se multiplica x en la recta
+;;         b : Valor de la b por el que se multiplica y en la recta
+;;         c : Valor independiente en la recta
+;; Resultado: 
+;;         La distancia entre el punto y la recta
+;; Descripción:
+;;        Calcula a*x+b*y+c/
+;; Funciones a las que llama:
+;;         D2 : Función que calcula la distancia Euclídea de dos puntos
+;;         areaTriangulo : Función que calcula el área del triángulo dado sus lados
+;;
+(define (distanciaPuntoRecta x y a b c)
+ (let(
+      (sq (sqrt (+ (* a a) (* b b))))
+      (recta (+ (* a x) (* b y) c))
+     )
+   (/ (abs recta) sq)))
+
+
+(define (distanciaPuntoRecta2 x0 y0 x1 y1 x2 y2)
+  (let(
+       (a (- y2 y1))
+       (b (- x1 x2))
+       (c (- (* y1 x2) (* x1 y2)))
+      )
+     (distanciaPuntoRecta x0 y0 a b c)))
+
+
+
+;; 
+;; Nombre: areaTrapecioLetVertices
+;; Objetivo: Calcula el area de un rombo a traves de sus vertices
+;; Parámetro:
+;;         x1 : Coordenada x del primer punto de la primera diagonal del rombo
+;;         y1 : Coordenada y del primer punto de la primera diagonal del rombo
+;;         x2 : Coordenada x del segundo punto de la primera diagonal del rombo
+;;         y2 : Coordenada y del segundo punto de la primera diagonal del rombo
+;;         x3 : Coordenada x del primer punto de la segunda diagonal del rombo
+;;         y3 : Coordenada y del primer punto de la segunda diagonal del rombo
+;;         x4 : Coordenada x del segundo punto de la segunda diagonal del rombo
+;;         y4 : Coordenada y del segundo punto de la segunda diagonal del rombo
+;; Resultado: 
+;;         El area de un rombo
+;; Descripción:
+;;        Calcula la distancia euclídea entre las dos diagonales del rombo y tras ello, calcula el area del rombo con esas diagonales
+;; Funciones a las que llama:
+;;         D2 : Función que calcula la distancia Euclídea de dos puntos
+;;         areaRombo : Función que calcula el área de un rombo dada sus diagonales
+;;
+(define (areaTrapecioLetVertices x1 y1 x2 y2 x3 y3 x4 y4)
+  (let(
+       (base1 (D2 x1 y1 x2 y2))
+       (base2 (D2 x3 y3 x4 y4))
+       (altura (distanciaPuntoRecta2 x1 y1 x3 y3 x4 y4))
+       )
+    (areaTrapecio base1 base2 altura)))
