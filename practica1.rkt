@@ -270,10 +270,8 @@
 ;; Resultado: 
 ;;         La distancia entre el punto y la recta
 ;; Descripción:
-;;        Calcula a*x+b*y+c/
-;; Funciones a las que llama:
-;;         D2 : Función que calcula la distancia Euclídea de dos puntos
-;;         areaTriangulo : Función que calcula el área del triángulo dado sus lados
+;;        Calcula a*x+b*y+c/√a^2+b^2
+;; Funciones a las que llama: ninguna
 ;;
 (define (distanciaPuntoRecta x y a b c)
  (let(
@@ -282,7 +280,23 @@
      )
    (/ (abs recta) sq)))
 
-
+;; 
+;; Nombre: distanciaPuntoRecta2
+;; Objetivo: Calcula la distancia entre un punto y la recta que pasa por dos punto
+;; Parámetro:
+;;         x0 : Coordenada x del punto al que se quiere calcular la distancia
+;;         y0 : Coordenada y del punto al que se quiere calcular la distancia
+;;         x1 : Coordenada x del primer punto que pasa por la recta
+;;         y1 : Coordenada y del primer punto que pasa por la recta
+;;         x2 : Coordenada x del segundo punto que pasa por la recta
+;;         y2 : Coordenada y del segundo punto que pasa por la recta
+;; Resultado: 
+;;         La distancia entre el punto y la recta
+;; Descripción:
+;;        Primero calcula los valores de la recta y luego llama a la función distanciaPuntoRecta
+;; Funciones a las que llama: 
+;;        distanciaPuntoRecta: Calcula la distancia entre un punto y una recta con los valores de la recta
+;;
 (define (distanciaPuntoRecta2 x0 y0 x1 y1 x2 y2)
   (let(
        (a (- y2 y1))
@@ -295,23 +309,26 @@
 
 ;; 
 ;; Nombre: areaTrapecioLetVertices
-;; Objetivo: Calcula el area de un rombo a traves de sus vertices
+;; Objetivo: Calcula el area de un trapecio a traves de sus vertices
 ;; Parámetro:
-;;         x1 : Coordenada x del primer punto de la primera diagonal del rombo
-;;         y1 : Coordenada y del primer punto de la primera diagonal del rombo
-;;         x2 : Coordenada x del segundo punto de la primera diagonal del rombo
-;;         y2 : Coordenada y del segundo punto de la primera diagonal del rombo
-;;         x3 : Coordenada x del primer punto de la segunda diagonal del rombo
-;;         y3 : Coordenada y del primer punto de la segunda diagonal del rombo
-;;         x4 : Coordenada x del segundo punto de la segunda diagonal del rombo
-;;         y4 : Coordenada y del segundo punto de la segunda diagonal del rombo
+;;         x1 : Coordenada x del primer punto de la primera base del trapecio
+;;         y1 : Coordenada y del primer punto de la primera base del trapecio
+;;         x2 : Coordenada x del segundo punto de la primera base del trapecio
+;;         y2 : Coordenada y del segundo punto de la primera base del trapecio
+;;         x3 : Coordenada x del primer punto de la segunda base del trapecio
+;;         y3 : Coordenada y del primer punto de la segunda base del trapecio
+;;         x4 : Coordenada x del segundo punto de la segunda base del trapecio
+;;         y4 : Coordenada y del segundo punto de la segunda base del trapecio
 ;; Resultado: 
 ;;         El area de un rombo
 ;; Descripción:
-;;        Calcula la distancia euclídea entre las dos diagonales del rombo y tras ello, calcula el area del rombo con esas diagonales
+;;        Calcula la distancia euclídea entre las dos bases del trapecio y tras ello, 
+;;        calcula la altura con la distancia entre un punto de una de las bases y la recta formada por la otra base con la función distanciaPuntoRecta2.
+;;        Por último calcula el area del trapecio con los datos obtenidos.
 ;; Funciones a las que llama:
 ;;         D2 : Función que calcula la distancia Euclídea de dos puntos
-;;         areaRombo : Función que calcula el área de un rombo dada sus diagonales
+;;         areaTrapecio : Función que calcula el área de un trapecio dada sus bases y su altura
+;;         distanciaPuntoRecta2 : Calcula la distancia entre un punto y la recta que pasa por dos puntos
 ;;
 (define (areaTrapecioLetVertices x1 y1 x2 y2 x3 y3 x4 y4)
   (let(
