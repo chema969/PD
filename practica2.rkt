@@ -288,19 +288,28 @@
   (let(
        (paralelos1 (ladosParalelos? x0 y0 x1 y1 x2 y2 x3 y3))
        (paralelos2 (ladosParalelos? x0 y0 x2 y2 x1 y1 x3 y3))
-       (paralelos3 (ladosParalelos? x0 y0 x3 y3 x1 y1 x2 y2))
        )
-    (if (or (and paralelos1 paralelos2) (and paralelos1 paralelos3) (and paralelos2 paralelos3))
-        (if  (not (or (and (perpendiculares? x0 y0 x1 y1 x0 y0 x2 y2) (perpendiculares? x3 y3 x1 y1 x3 y3 x2 y2))
-                      (and (perpendiculares? x0 y0 x1 y1 x0 y0 x3 y3) (perpendiculares? x2 y2 x1 y1 x2 y2 x3 y3))
-                      (and (perpendiculares? x3 y3 x1 y1 x3 y3 x0 y0) (perpendiculares? x2 y2 x1 y1 x2 y2 x0 y0))))
-             3
+    (if (and paralelos1 paralelos2)
+        (if  (not  (and (perpendiculares? x0 y0 x1 y1 x0 y0 x2 y2) (perpendiculares? x3 y3 x1 y1 x3 y3 x2 y2)))
+             (if (not (= (D2 x0 y0 x1 y1) (D2 x2 y2 x3 y3) (D2 x0 y0 x2 y2) (D2 x1 y1 x3 y3)))
+                 4
+                 3
+             )    
              (if (not (= (D2 x0 y0 x1 y1) (D2 x2 y2 x3 y3) (D2 x0 y0 x2 y2) (D2 x1 y1 x3 y3)))
                  2
                  1
                  )
              )
-        0
+        (if (or paralelos1 paralelos2)
+            (if (or (perpendiculares? x0 y0 x1 y1 x0 y0 x2 y2) (perpendiculares? x3 y3 x1 y1 x3 y3 x2 y2))
+                5
+                (if (not (or (= (D2 x0 y0 x1 y1) (D2 x2 y2 x3 y3)) (= (D2 x0 y0 x2 y2) (D2 x1 y1 x3 y3))))
+                    7
+                    6
+                    )
+                )
+            0
+            )
     )
   )
 )    
