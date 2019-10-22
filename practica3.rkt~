@@ -1,0 +1,9 @@
+(define (contarCifrasIterativa entero)
+  (let
+      (natural (abs(entero)))
+  (do
+      ((x 1 (+ x 1)))
+    )
+  ((< 1 (expt 10 x)) x)
+    )
+  )
