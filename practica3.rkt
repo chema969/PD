@@ -133,3 +133,22 @@
       -1
       )
   )
+
+
+(define (primoIterativo? entero)
+  (if (and (integer? entero) (positive? a))
+        (do
+            (
+             (x (sumaDigitosRecursiva entero) (sumaDigitosRecursiva sum))
+             (divisor #f (< 1e-6 (-
+             )
+          ((or(= 1 x) (divisor))
+           (if(divisor)
+              #f
+              #t
+              )
+           )
+          )      
+      #f
+      )
+  )
