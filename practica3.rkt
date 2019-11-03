@@ -370,6 +370,7 @@
    )
    ;Cuerpo del let
    (if (and (or (positive? (f a)) (= 0 (f a))) (or (positive? (f b)) (= 0 (f a))) )
+       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
        (do
            (
             (i 0 (+ i 1))
@@ -377,6 +378,7 @@
             (xi+1 (+ a (* 1 h)) (+ a (* (+ i 1) h))) 
             (sum 0. (+ sum (* (/ (+ (f xi) (f xi+1)) 2) h)))
             )
+         ;Condición de salida
          ((= i (- n 1)) sum)
          )
        0
@@ -396,6 +398,20 @@
      )
   )
 
+
+
+;; 
+;; Nombre: sumar-serie-cota-error
+;; Objetivo: Calcula la suma de cualquier serie numérica convergente teniendo en cuenta una cota de error.
+;; Parámetro:
+;;         f: Función que represente el término general de la serie
+;;         inicial: Índice del primer término
+;;         siguiente: Funcion que permita pasar al siguiente término de la serie
+;;         cota: Cota de error
+;; Resultado: 
+;;         Una aproximación a la convergencia de la serie
+;; Funciones a las que llama: ninguna
+;;
 (define (sumar-serie-cota-error f inicial siguiente cota)
   (do
       (
@@ -403,6 +419,7 @@
        (termino-siguiente  0 (f n))
        (suma 0. (+ suma termino-siguiente))
        )
+    ;Condición de salida, que es que la función dé un valor menor a la cota
     ((> cota (abs (f n))) suma)
     )
   )
@@ -410,15 +427,35 @@
 
 
 
+;; Nombre: sumar-serie-cota-error
+;; Objetivo: Calcula la suma de cualquier serie numérica convergente de manera recusiva teniendo en cuenta una cota de error.
+;; Parámetro:
+;;         f: Función que represente el término general de la serie
+;;         inicial: Índice del primer término
+;;         siguiente: Funcion que permita pasar al siguiente término de la serie
+;;         cota: Cota de error
+;; Resultado: 
+;;         Una aproximación a la convergencia de la serie
+;; Funciones a las que llama: aux-> funcion recursiva de cola que hace los calculos
+;;
+
 (define (sumar-serie-cota-error-recursiva f inicial siguiente cota)
+  ;Funciones auxiliares
   (define (aux f inicial siguiente cota sumafinal)
-  (if (> cota (abs (f inicial)))
+    
+   (if (> cota (abs (f inicial)))
+      ;Si es la función de un valor menor a la cota
       sumafinal
+      ;Si no, se llama recursivamente aumentando el inicial por el termino siguiente
       (aux f (+ siguiente inicial) siguiente cota (+ sumafinal (f inicial)))      
     )
   )
+  ;Llamamos a la función auxiliar.
   (aux f inicial siguiente cota 0.)
   )
+
+
+
 
 (define (leibniz x)
   (/ (expt -1 x) (+ (* 2 x) 1)))
@@ -433,9 +470,29 @@
 ;(sumar-serie-cota-error-recursiva potenciasde2 0 1 0.0000000001)
 
 
+;; Nombre: terminoNumeroE
+;; Objetivo: Calcula el temino n-esimo de la sucesión an = (1 + 1/n)^n.
+;; Parámetro:
+;;         x: Termino
+;; Resultado: 
+;;         Termino n-esimo de la sucesión
+;; Funciones a las que llama: Ninguna
+;;
+
 (define (terminoNumeroE x)
   (expt (+ 1. (/ 1 x)) x))
 
+
+
+
+;; Nombre: limiteSucesionNumeroE
+;; Objetivo: calcular el límite de la sucesión numérica que converge al número e.
+;; Parámetro:
+;;         cota: Cota de error
+;; Resultado: 
+;;         El límite n de la sucesión numérica que converge al número e, tal que |an+1 - an|< cota.
+;; Funciones a las que llama: Ninguna
+;;
 (define (limiteSucesionNumeroE cota)
   (do
       (
@@ -443,11 +500,20 @@
        (f_an (terminoNumeroE 1) (terminoNumeroE an))
        (f_an+1 (terminoNumeroE 2) (terminoNumeroE (+ an 1)))
        )
+    ;Condición de salida, que es que |an+1 - an|< cota
     ((> cota (abs (- f_an f_an+1))) f_an)
     )
   )
 ;(limiteSucesionNumeroE 0.000001)
 
+;; Nombre: limiteIterativa
+;; Objetivo: calcular el límite de cualquier sucesión numérica tal que sea menor que la cota de error.
+;; Parámetro:
+;;         cota: Cota de error
+;; Resultado: 
+;;         El límite n de cualquier sucesión numérica, tal que |an+1 - an|< cota.
+;; Funciones a las que llama: Ninguna
+;;
 (define (limiteIterativa f cota)
   (do
       (
@@ -455,20 +521,32 @@
        (f_an (f 1) (f an))
        (f_an+1 (f 2) (f (+ an 1)))
        )
+    ;Condición de salida, que es que |an+1 - an|< cota
     ((> cota (abs (- f_an f_an+1))) f_an)
     )
   )
 
 ;(limiteIterativa terminoNumeroE 0.000001)
 
+
+;; Nombre: sumaAureoIterativo
+;; Objetivo: calcular el número áureo usando la sucesion.
+;; Parámetro:
+;;         n: número de sumandos
+;; Resultado: 
+;;        La sucesión que da lugar al numero aureo hasta el sumando n
+;; Funciones a las que llama: Ninguna
+;;
 (define (sumaAureoIterativo n)
   (if (not(and (positive? n) (integer? n)))
+      ;Si n no es positiva o entera, retornamos 0
       0
       (do
           (
            (sum 1 (sqrt (+ sum 1)))
            (s 0 (+ s 1))
            )
+        ;Condición de salida, que es que n sea igual a s
         ((= s n) sum)
         )
       )
@@ -476,9 +554,21 @@
 ;(sumaAureoIterativo 10000)
 
 
+
+
+;; Nombre: sumaAureoIterativo
+;; Objetivo: calcular el número áureo usando la sucesion recursivamente.
+;; Parámetro:
+;;         n: número de sumandos
+;; Resultado: 
+;;        La sucesión que da lugar al numero aureo hasta el sumando n
+;; Funciones a las que llama: aux-> funcion recursiva de cola que hace los calculos
+;;
 (define (sumaAureoRecursivo n)
+  ;Función auxiliar 
   (define (aux n sum)
     (if (= n 0)
+        ;Si n=0, hemos hecho todos los sumandos y retornamos la suma final
         sum
         (aux (- n 1) (sqrt (+ sum 1)))
         )
@@ -486,68 +576,130 @@
 
     
   (if (not(and (positive? n) (integer? n)))
+      ;Si n no es positiva o entera, retornamos 0
       0
+      ;Si lo es, llamamos a la función auxiliar
       (aux n 0)
       )
   )
 ;(sumaAureoRecursivo 10000)
 
+
+
+
+
+
+;; Nombre: fraccioncontinua
+;; Objetivo: calcula una aproximación a pi usando la fracción continua
+;; Parámetro:
+;;         n: número de fracciones continuas que debe calcular
+;; Resultado: 
+;;        Un número cercano a pi
+;; Funciones a las que llama:
+;;        auxiliar: Funcion que realiza el calculo 1+2*(s-1)
+;;
+
 (define (fraccioncontinua n)
+  ;Función auxiliar
   (define (auxiliar s)
     (+ 1 (* 2 (- s 1)))
     )
   (if (not(and (positive? n) (integer? n)))
+      ;Si n no es positiva o entera, retornamos 0
       0
       (do
           (
            (sum (+ (auxiliar n) (* n n)) (+ (auxiliar s) (/ (* s s) sum)))
            (s n (- s 1))
            )
+        ;Condición de salida, que es que se haya hecho el calculo n veces
         ((= s 0) (/ 4 sum))
         )
       )
   )
 ;(fraccioncontinua 120.)
 
+;; Nombre: factorWallis
+;; Objetivo: calcula el n-ésimo factor de la sucesión de Wallis
+;; Parámetro:
+;;         n: posición del factor que se quiere calcular
+;; Resultado: 
+;;        El n-ésimo factor de la sucesión de Wallis
+;; Funciones a las que llama: ninguna
+;;
 
 (define (factorWallis n)
   (let
       ((x (floor (/ n 2))))
+       ;Cuerpo del let
        (if (odd? n)
+           ;Si es par 
            (/ (* 2. (+ 1 x)) (- (* 2 (+ 1 x)) 1) )
+           ;Si es inpar
            (/ (* 2. x) (+ (* 2 x) 1))
            )
        
     )
   )
 
-
+;; Nombre: WallisIterativa
+;; Objetivo: calcula el sumatorio de la sucesión de Wallis hasta la posición n.
+;; Parámetro:
+;;         n: posición del factor que se quiere calcular
+;; Resultado: 
+;;        Una aproximación a pi/2
+;; Funciones a las que llama: ninguna
+;;
 (define (WallisIterativa n)
   (if (not(and (positive? n) (integer? n)))
+      ;Si n no es positiva o entera, retornamos 0
       0
       (do
           (
            (mult 1 (* mult (factorWallis s)))
            (s 1 (+ s 1))
            )
+        ;Condicion de salida
         ((= s n) mult)
         )
       )
   )
 
 ; (WallisIterativa 10000); Tiende a pi/2
+
+
+;; Nombre: WallisIterativa
+;; Objetivo: calcula el sumatorio de la sucesión de Wallis hasta que 1 - cota < factor < 1 + cota.
+;; Parámetro:
+;;         cota: Cota de error
+;; Resultado: 
+;;        Una aproximación a pi/2
+;; Funciones a las que llama: aux-> funcion recursiva de cola que hace los calculos
+;;
 (define (WallisRecursiva cota)
+  ;Función auxiliar
   (define (aux mult n cota)
     (if (< (- 1 cota) (factorWallis n) (+ 1 cota))
+        ;Si 1 - cota < factor < 1 + cota.
         mult
         (aux (* mult (factorWallis n)) (+ 1 n) cota)
         )
     )
+  ;Llama a la función auxiliar
   (aux 1 1 cota)
   )
 
+;;(WallisRecursiva 0.000001);;Tiende a pi/2
 
 
+;; Nombre: WallisIterativa
+;; Objetivo: devuelve una funcion que calcularia (f(x+1)-2f(x)+f(x-1))/4.
+;; Parámetro:
+;;         f: Función sobre la que calcular el incremento
+;; Resultado: 
+;;        Una funcion que calcularia (f(x+1)-2f(x)+f(x-1))/4.
+;; Funciones a las que llama: ninguna
+;;
 (define (incrementoFuncional f)
   (lambda (x)
     (/ (+ (f (- x 1)) (* -2 (f x)) (f (+ 1 x))) 4)))
