@@ -40,22 +40,23 @@
 
 
 (define (aplicarMatriz v m)
-  
+  ;Funciones de control
   (if (or (not(vector? v))(not(vector? m)))
       0
       (if  (not (= (vector-length v) (vector-length m)))
            0
            (do
                (
-                (n 0 (+ n 1))
+                (n 1 (+ n 1))
                 (v2 (build-vector (vector-length m) (lambda(x) (vector-ref (vector-ref m x) 0)))(build-vector (vector-length m) (lambda(x) (vector-ref (vector-ref m x) n))))
                 (vector-final #() (vector-append  vector-final (vector (productoEscalar v v2))))
                 )
-             ((= n  (- (vector-length v) 1) ) vector-final)
-             (display v2)
+             ((= n  (vector-length(vector-ref m 0))  ) (vector-append  vector-final (vector (productoEscalar v v2))))
+             
              )
            )
       )
   
   )
-(aplicarMatriz #(1 1 1) #(#(1 2) #(3 4) #(5 6)))
+;(aplicarMatriz #(1 1 1) #(#(1 2 2) #(3 4 5) #(5 6 6)));=(9 12 13)
+;(aplicarMatriz #(1 -1 2) #(#(1 2 2) #(3 4 5) #(5 6 6)));=(8 10 9)
