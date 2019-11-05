@@ -370,7 +370,6 @@
    )
    ;Cuerpo del let
    (if (and (or (positive? (f a)) (= 0 (f a))) (or (positive? (f b)) (= 0 (f a))) )
-       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
        (do
            (
             (i 0 (+ i 1))
@@ -390,15 +389,22 @@
 (define (funcionPractica x) (+ 1 (* 3 x x)))
 ;(integral 0 3 funcionPractica 100000);Aproximadamente 30
 
-
+;;FUNCION DE SUMAR SERIE DADA EN CLASE 
 (define (sumar-serie termino siguiente inicial final)
   (if(> inicial final)
      0
-     (+ (termino inicial)(sumar-serie término siguiente (siguiente inicial) final))
+     (+ (termino inicial)(sumar-serie termino siguiente (siguiente inicial) final))
      )
   )
 
+;;FUNCION PARA LA INTEGRAL DEFINIDA DADA EN CLASE
+(define(integralVersionClase f inicial final h)
+  ;; función para obtener el siguiente elemento
+  (define(sumar-h x) (+ x h))
+  ;; cuerpo de integral
+  (* (sumar-serie f sumar-h (+ inicial (/ h 2)) final) h))
 
+;(integralVersionClase funcionPractica 0 3 0.00001); Un aproximado a 30
 
 ;; 
 ;; Nombre: sumar-serie-cota-error
@@ -415,7 +421,7 @@
 (define (sumar-serie-cota-error f inicial siguiente cota)
   (do
       (
-       (n inicial (+ n siguiente))
+       (n inicial (siguiente n))
        (termino-siguiente  0 (f n))
        (suma 0. (+ suma termino-siguiente))
        )
@@ -447,7 +453,7 @@
       ;Si es la función de un valor menor a la cota
       sumafinal
       ;Si no, se llama recursivamente aumentando el inicial por el termino siguiente
-      (aux f (+ siguiente inicial) siguiente cota (+ sumafinal (f inicial)))      
+      (aux f (siguiente inicial) siguiente cota (+ sumafinal (f inicial)))      
     )
   )
   ;Llamamos a la función auxiliar.
@@ -455,19 +461,19 @@
   )
 
 
-
+(define (sumar1 x) (+ x 1.0))
 
 (define (leibniz x)
   (/ (expt -1 x) (+ (* 2 x) 1)))
 
-;(sumar-serie-cota-error leibniz 0 1 0.00001);Tiende a pi/4
-;(sumar-serie-cota-error-recursiva leibniz 0 1 0.00001)
+;(sumar-serie-cota-error leibniz 0 sumar1 0.00001);Tiende a pi/4
+;(sumar-serie-cota-error-recursiva leibniz 0 sumar1 0.00001)
 
 (define (potenciasde2 x)
   (/ 1 (expt 2 x)))
 
-;(sumar-serie-cota-error potenciasde2 0 1 0.0000000001);Tiende a 2
-;(sumar-serie-cota-error-recursiva potenciasde2 0 1 0.0000000001)
+;(sumar-serie-cota-error potenciasde2 0 sumar1 0.0000000001);Tiende a 2
+;(sumar-serie-cota-error-recursiva potenciasde2 0 sumar1 0.0000000001)
 
 
 ;; Nombre: terminoNumeroE
