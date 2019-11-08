@@ -126,27 +126,47 @@
 
 
 (define (productoVectorial v1 v2)
+  
   (define (determinante v1 v2)
     (if  (not (= (vector-length v1) (vector-length v2) 2))
          0
-         ((- (* 
-
+         (- (* (vector-ref v1 0) (vector-ref v2 1)) (* (vector-ref v2 0) (vector-ref v1 1)))
     )
+    )
+  
+  (define (subv v n)
+  (do
+      (
+       (s 0 (+ s 1))
+       (vectorF #() (if(not(= n s))
+                       (vector-append vectorF (vector(vector-ref v s)))
+                       vectorF))
+       )
+    ((= s (vector-length v)) vectorF)
+    )
+  )
   ;Fin de la funciones auxiliares
   (if (or (not(vector? v1))(not(vector? v2)))
       ;Si uno de los dos elementos no es un vector, retorna 0
       0
-            (if  (not (= (vector-length v1) (vector-length v2) 3))
+           (if  (not (= (vector-length v1) (vector-length v2) 3))
            ;Si los dos elementos son iguales, retorna 0
            0
            (do
                (
-                (n 0 (+ n 1))
-                (sum 0 (+ sum (* (vector-ref v1 n) (vector-ref v2 n))))
+                (n 1 (+ n 1))
+                (subvec1 (subv v1 0) (subv v1 n))
+                (subvec2 (subv v2 0) (subv v2 n))
+                (vectorf #() (if(even? (- n 1))
+                                (vector-append vectorf (vector (determinante subvec1 subvec2)))
+                                (vector-append vectorf (vector (- (determinante subvec1 subvec2)))))
+                )
                 )
              ;Condición de salida, que es que ya se hayan recorrido todos los elementos
-             ((= n (vector-length v1)) sum)
+             ((= (- n 1) (vector-length v1)) vectorf)
              )
            )
       )
   )
+
+
