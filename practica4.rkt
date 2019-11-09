@@ -87,7 +87,7 @@
 
 ;; 
 ;; Nombre: aplicarMatriz
-;; Objetivo: Realiza el producto vectorial de un vector por las columnas de una matriz
+;; Objetivo: Realiza el producto escalar de un vector por las columnas de una matriz
 ;; Parámetro:
 ;;         m: Matriz
 ;;         v: Vector
@@ -125,27 +125,47 @@
 ;(aplicarMatriz #(1 1 3) #(#(1 2 3) #(4 5) #(6 7 8)));=0
 
 
+;; 
+;; Nombre: productoVectorial
+;; Objetivo: Realiza el producto vectorial de dos vectores de orden 3
+;; Parámetro:
+;;         v1: Primer vector
+;;         v2: Segundo vector
+;; Resultado: 
+;;         0 si la operación no se puede realizar, un vector con el producto vectorial de ambos vectores
+;; Funciones a las que llama:
+;;         determinante:Calcula el deteminante de una matriz de orden 2
+;;         subv:Calcula un subvector del vector x con todos los elementos menos el indicado
+;;
 (define (productoVectorial v1 v2)
   
+  ;Primera función auxiliar que calcula el determinante de un vector de orden 2
   (define (determinante v1 v2)
     (if  (not (= (vector-length v1) (vector-length v2) 2))
+         ;Si no es de orden 2, devuelve 0
          0
          (- (* (vector-ref v1 0) (vector-ref v2 1)) (* (vector-ref v2 0) (vector-ref v1 1)))
     )
     )
   
+  ;Segunda función auxiliar que calcula un subvector del vector x con todos los elementos menos el indicado
   (define (subv v n)
   (do
       (
        (s 0 (+ s 1))
        (vectorF #() (if(not(= n s))
+                       ;Si el elemento no es n, lo añade al vector final
                        (vector-append vectorF (vector(vector-ref v s)))
-                       vectorF))
+                       vectorF
+                       )
+                )
        )
+    ;Condición de salida
     ((= s (vector-length v)) vectorF)
     )
   )
   ;Fin de la funciones auxiliares
+  
   (if (or (not(vector? v1))(not(vector? v2)))
       ;Si uno de los dos elementos no es un vector, retorna 0
       0
@@ -159,6 +179,7 @@
                 (subvec2 (subv v2 0) (subv v2 n))
                 (vectorf #() (if(even? (- n 1))
                                 (vector-append vectorf (vector (determinante subvec1 subvec2)))
+                                ;Los valores impares se multiplican por -1
                                 (vector-append vectorf (vector (- (determinante subvec1 subvec2)))))
                 )
                 )
@@ -169,4 +190,202 @@
       )
   )
 
+;(productoVectorial #(13 2 -4) #(4 5 12));=#(44 -172 57)
+;(productoVectorial #(2 0 1) #(1 -1 3));=#(1 -5 -2)
+
+(define (meanVector v)
+  (if (not(vector? v))
+      ;Si v no es un vector, retorna 0
+      0
+      (do
+          (
+           ;Definición de variables
+           (n 0 (+ n 1))
+           (sumatotal 0 (+ sumatotal (vector-ref v n)))
+           )
+        ;Condicion de salida
+        ((= n  (vector-length v)) (/ sumatotal n))
+        )
+      )
+  )
+;(meanVector #(2. 4. 8. 5. 7.));=5.2
+;(meanVector #(21.3 38.4 12.7 41.6));=28.5
+
+
+(define (maxMin m)
+  
+  (define (menor v)
+    (if (not(vector? v))
+      ;Si v no es un vector, retorna 0
+      0
+      (do
+          (
+           ;Definición de variables
+           (n 1 (+ n 1))
+           (min (vector-ref v 0) (if(> min (vector-ref v n))
+                       ;Si el elemento no es n, lo añade al vector final
+                       (vector-ref v n)
+                       min
+                       )
+                )
+           )
+        ;Condicion de salida
+        ((= n  (vector-length v)) min)
+        )
+      )
+  )
+  
+  (if (not(vector? m))
+      ;Si v no es un vector, retorna 0
+      0
+      (do
+          (
+           ;Definición de variables
+           (n 1 (+ n 1))
+           (max (menor (vector-ref m 0))(if(< max (menor (vector-ref m n)))
+                       ;Si el elemento es mayor que el anteriormente encontrado,
+                       (menor (vector-ref m n))
+                       max
+                       )
+                )
+           )
+        ;Condicion de salida
+        ((= n  (vector-length m)) max)
+        )
+      )
+  )
+;(maxMin #(#(1. 2. 3.) #(4. 5. 6.) #(7. 8. 9.)));=7
+;(maxMin #(#(1. 2. 3.) #(111. 111. 26.) #(10. 8. 9.)));=26
+
+
+(define (filtrarPrimos l)
+  ;Funcion auxiliar
+  (define (primoIterativo? entero)
+  (if (and (integer? entero) (positive? entero))
+      ;Si no es un numero natural, se devuelve false
+      (if (= entero 2)
+          ;Si es dos, devolvemos #t
+          #t
+          (do
+              (
+               (x (ceiling (sqrt entero)) (- x 1)) 
+               )
+            ;Podemos salir del bucle o si encontramos un entero cuyo resto sea 0 al dividirlo por x o si el numero es menor que 2
+            ((or(>= 2 x)  (= 0 (modulo entero x)))
+             (if  (= 0 (modulo entero x))
+                  ;Si salimos porque se h
+                  #f
+                  #t
+                  )
+             )
+          )
+          )
+      #f
+      )
+  )
+  ;Funcion recursiva de cola
+  (define (recursiva lista listafinal)
+    (if (null? lista)
+        ;Si la lista ha llegado al final
+        listafinal
+        (if (primoIterativo? (car lista))
+            ;Si es un primo, este se añade a 
+            (recursiva (cdr lista) (append listafinal (list (car lista))))
+            (recursiva (cdr lista) listafinal)
+            )
+        )
+    )
+                       
+  
+  (if (not (list? l))
+      ;Si no es una lista 
+      '()
+      ;Si es una lista, se llama a la función recursiva
+      (recursiva l '())
+      )
+  )
+     
+
+(define (suprimir l x)
+  
+  (define (aux l x listafinal)
+    (if (null? l)
+        listafinal
+        (if (list? (car l))
+            (aux (cdr l) x (append listafinal (list (aux (car l) x '()))))
+            (if (= x (car l))
+                (aux (cdr l) x listafinal)
+                (aux (cdr l) x (append listafinal (list (car l))))
+                )
+            )
+        )
+    )
+  (aux l x '())
+  )
+;(suprimir '(1 2 3 4 (2 (3 2 34 3 2) 2 5 3) (3 4 5)) 2);=(1 3 4 ((3 34 3) 5 3) (3 4 5))
+
+
+
+(define (mergeSort l)
+  ;FUNCION SPLIT
+  (define (split l)
+    (define (aux l l1 l2 n)
+      (if (null? l)
+          (append (list l1) (list l2))
+          (if (even? n)
+              (aux (cdr l) (append l1 (list (car l))) l2 (+ n 1))
+              (aux (cdr l) l1 (append l2 (list (car l))) (+ n 1))
+              )
+          )
+      )
+    (aux l '() '() 0)
+    )
+  ;FUNCION MERGE
+  (define (merge l1 l2)
+    (define (auxmerge l1 l2 listafinal)
+      (if (and (null? l1) (null? l2))
+          listafinal
+          (if (null? l1)
+              (append listafinal l2)
+              (if (null? l2)
+                  (append listafinal l1)
+                  (if (< (car l1) (car l2))
+                      (auxmerge (cdr l1) l2 (append listafinal (list (car l1))))
+                      (auxmerge l1 (cdr l2) (append listafinal (list (car l2))))
+                      )
+                  )
+              )
+          )
+      )
+    (auxmerge l1 l2 '())
+    )
+  
+;FUNCION QUE DIVIDE TODOS LOS ELEMENTOS EN SUBLISTAS DE 1  
+  (define (recursivaSplit l)
+    (if (or (and (= (length (car l)) 1)(= (length (cadr l)) 1)) (null? (car l)) (null? (cadr l)))
+        ;Si las sublistas solo tienen un subelemento, las unimos
+        (merge (car l)  (cadr l))
+        (append (list (recursivaSplit (split (car l)))(recursivaSplit (split(cadr l)))))
+        )  
+    )
+  
+  (define (recursivaMerge l)
+    (if (and (list? (car l)) (list? (cadr l)) (not (list? (car (cadr l)))) (not (list? (car (car l)))))
+        (merge (car l) (cadr l))
+        (if (and (list? (car l)) (list? (cadr l)) (not (list? (car (cadr l)))))
+        (merge (recursivaMerge (car l)) (cadr l))
+                (if (and (list? (car l)) (list? (cadr l)) (not (list? (car (car l)))))
+                            (merge  (car l) (recursivaMerge(cadr l)))
+                            (merge  (recursivaMerge(car l)) (recursivaMerge(cadr l)))
+                            )
+                )
+        )
+    )
+    
+    
+        
+        
+            
+   (recursivaMerge (recursivaSplit (split l)))
+  )
 
