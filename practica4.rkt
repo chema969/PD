@@ -385,7 +385,53 @@
     
         
         
-            
-   (recursivaMerge (recursivaSplit (split l)))
+  (if (null? l)
+      '()
+      (if (= (length l) 1)
+          l
+          (if (= (length l) 2)
+              (merge (list (car l)) (list (cadr l)))
+              (recursivaMerge (recursivaSplit (split l)))
+              )
+          )
+      )
   )
 
+(define mergeSortDatos
+  (lambda lista
+    (mergeSort lista)
+    )
+  )
+
+
+(define (listaOrdenada? l)
+  (if (or (not (list? l)) (null? l))
+      #f
+      (if (null? (cdr l))
+          #t
+          (if (> (car l) (cadr l))
+              #f
+              (listaOrdenada? (cdr l))
+              )
+          )
+      )
+  )
+
+(define ordenados?
+  (lambda lista
+    (listaOrdenada? lista)
+    )
+  )
+
+(define (aplicarLista f l)
+  (if (or (not (list? l)) (not (procedure? f)))
+      '()
+      (map f l)
+      )
+  )
+
+(define aplicar
+  (lambda (f . lista)
+    (aplicarLista f lista)
+    )
+  )
