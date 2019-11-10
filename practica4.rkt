@@ -109,6 +109,7 @@
                    (
                     (n 1 (+ n 1))
                     (v2 (build-vector (vector-length m) (lambda(x) (vector-ref (vector-ref m x) 0)))(build-vector (vector-length m) (lambda(x) (vector-ref (vector-ref m x) n))))
+                    ;Construimos un subvector con los vectores columna de la matriz
                     (vector-final #() (vector-append  vector-final (vector (productoEscalar v v2))))
                     )
                  ;Condición de salida
@@ -193,6 +194,15 @@
 ;(productoVectorial #(13 2 -4) #(4 5 12));=#(44 -172 57)
 ;(productoVectorial #(2 0 1) #(1 -1 3));=#(1 -5 -2)
 
+;; 
+;; Nombre: meanVector
+;; Objetivo: Calcula la media de los elementos de un vector
+;; Parámetro:
+;;         v: Vector
+;; Resultado: 
+;;         0 si la operación no se puede realizar, la media de sus elementos si no
+;; Funciones a las que llama: Ninguna
+;;
 (define (meanVector v)
   (if (not(vector? v))
       ;Si v no es un vector, retorna 0
@@ -211,7 +221,16 @@
 ;(meanVector #(2. 4. 8. 5. 7.));=5.2
 ;(meanVector #(21.3 38.4 12.7 41.6));=28.5
 
-
+;; 
+;; Nombre: maxMin
+;; Objetivo: Calcula el máximo de los minimos elementos de los subvectores en m
+;; Parámetro:
+;;         m: Una matriz con subvectores de x tamaño
+;; Resultado: 
+;;         0 si la operación no se puede realizar,  el máximo de los minimos elementos de los subvectores en m si no
+;; Funciones a las que llama:
+;;         menor: Calcula el menor elemento de un subvector
+;;
 (define (maxMin m)
   
   (define (menor v)
@@ -234,7 +253,7 @@
         )
       )
   )
-  
+  ;Fin de la función auxiliar
   (if (not(vector? m))
       ;Si v no es un vector, retorna 0
       0
@@ -258,6 +277,18 @@
 ;(maxMin #(#(1. 2. 3.) #(111. 111. 26.) #(10. 8. 9.)));=26
 
 
+
+;; 
+;; Nombre: filtrarPrimos
+;; Objetivo: Sacar una sublista con los elementos que son primos de la lista l
+;; Parámetro:
+;;         l: Una lista sin sublistas
+;; Resultado: 
+;;         Una lista vacia si la operación no se puede realizar, una sublista con los elementos primos si no
+;; Funciones a las que llama:
+;;         primoIterativo?: Calcula iterativamente si un entero es primo
+;;         recursiva: Funcion recursiva que recorre una lista y saca una sublista con los elementos primos de la lista
+;;
 (define (filtrarPrimos l)
   ;Funcion auxiliar
   (define (primoIterativo? entero)
@@ -296,7 +327,7 @@
         )
     )
                        
-  
+  ;Fin de las funciones auxiliares
   (if (not (list? l))
       ;Si no es una lista 
       '()
@@ -304,52 +335,98 @@
       (recursiva l '())
       )
   )
-     
+;(filtrarPrimos '(2 3 4 5 6 7 8 9 10 11 22 23 25 31 33));=(2 3 5 7 11 23 31)
+;(filtrarPrimos 2 );=()
+;(filtrarPrimos '(4 6 8 9 12));=()
 
+
+;; 
+;; Nombre: suprimir
+;; Objetivo: Sacar una sublista con todos los elementos que no sean x de la lista l
+;; Parámetro:
+;;         l: Una lista con posibles sublistas
+;;         x: Elemento a eliminar de la lista x
+;; Resultado: 
+;;         Una lista sin los elementos x
+;; Funciones a las que llama:
+;;         aux: Función recursiva de cola que elimina de la lista el elemento x   
+;;
 (define (suprimir l x)
-  
+  ;Función auxiliar recursiva
   (define (aux l x listafinal)
     (if (null? l)
+        ;Si o hemos llegado a una lista vacia o al elemento final de una lista, retorno la listafinal
         listafinal
         (if (list? (car l))
+            ;Si es una sublista, llamo recursivamente dos veces a la fucion, una con la sublista y otra con la lista
             (aux (cdr l) x (append listafinal (list (aux (car l) x '()))))
             (if (= x (car l))
+                ;Si el elemento a mirar de la lista es x, no lo añadimos a la lista final
                 (aux (cdr l) x listafinal)
+                ;Si sí los es, lo añadimos a la lista final
                 (aux (cdr l) x (append listafinal (list (car l))))
                 )
             )
         )
     )
+  ;Fin de la función auxiliar recursiva
+  ;Se llama a la función recursiva con listafinal siendo una lista vacia
   (aux l x '())
   )
 ;(suprimir '(1 2 3 4 (2 (3 2 34 3 2) 2 5 3) (3 4 5)) 2);=(1 3 4 ((3 34 3) 5 3) (3 4 5))
 
 
-
+;; 
+;; Nombre: mergeSort
+;; Objetivo: Ordena una lista mediante el método de ordenación mergesort
+;; Parámetro:
+;;         l: Una lista sin sublistas y de números
+;; Resultado: 
+;;         La sublista ordenada
+;; Funciones a las que llama:
+;;         split: Función recursiva que divide los elementos en dos sublistas dependiendo de si están en una posicion par o impar
+;;         merge: Función recursiva que une dos listas de modo ordenado. Devuelve una lista ordenada siempre que las sublistas esten ordenadas
+;;         recursivaSplit: Función recursiva que va separando todos los elementos en sublistas unidas de 1 o dos elementos
+;;         recursivaMerge: Funcion que reune todos los elementos separados anteriormente por recursivaSplit de manera ordenada
+;;
 (define (mergeSort l)
   ;FUNCION SPLIT
   (define (split l)
+    ;Función auxiliar
     (define (aux l l1 l2 n)
       (if (null? l)
+          ;Si la lista l es nula, hemos llegado al final y unimos l1 con l2
           (append (list l1) (list l2))
           (if (even? n)
+              ;Si el elemento ocupa una posición par, unimos el elemento (car l) a l1 y llamamos recursivamente a la función con (cdr l)
               (aux (cdr l) (append l1 (list (car l))) l2 (+ n 1))
+              ;Si el elemento ocupa una posición impar, unimos el elemento (car l) a l2 y llamamos recursivamente a la función con (cdr l)
               (aux (cdr l) l1 (append l2 (list (car l))) (+ n 1))
               )
           )
       )
+    ;Fin de la funcion auxiliar, llamamos a esta con l y dos sublistas vacias
     (aux l '() '() 0)
     )
+  ;Fin de split, ejemplo de resultados abajo
+  ;(split '(1 2 3 4 5 6 7);=((1 3 5 7) (2 4 6))
+
+  
   ;FUNCION MERGE
   (define (merge l1 l2)
+    ;Función auxiliar
     (define (auxmerge l1 l2 listafinal)
       (if (and (null? l1) (null? l2))
+          ;Si ambas listas no tienen elementos, retornamos listafinal
           listafinal
           (if (null? l1)
+              ;Si la lista l1 no tiene elementos, retornamos listafinal junto a los elementos que queden de l2
               (append listafinal l2)
               (if (null? l2)
+                  ;Si la lista l2 no tiene elementos, retornamos listafinal junto a los elementos que queden de l1
                   (append listafinal l1)
                   (if (< (car l1) (car l2))
+                      ;Vamos introduciendo los elementos de manera ordenada a la lista final
                       (auxmerge (cdr l1) l2 (append listafinal (list (car l1))))
                       (auxmerge l1 (cdr l2) (append listafinal (list (car l2))))
                       )
@@ -357,81 +434,174 @@
               )
           )
       )
+    ;Fin de la funcion auxiliar, llamamos a auxmerge con listafinal siendo una lista vacia
     (auxmerge l1 l2 '())
     )
+  ;Fin de merge, ejemplo de resultado abajo
+  ;(merge '(1 4 7) '(2 3 5 6));=(1 2 3 4 5 6 7)
   
-;FUNCION QUE DIVIDE TODOS LOS ELEMENTOS EN SUBLISTAS DE 1  
+;FUNCION QUE DIVIDE TODOS LOS ELEMENTOS EN SUBLISTAS DE UNO O DOS ELEMENTOS 
   (define (recursivaSplit l)
     (if (or (and (= (length (car l)) 1)(= (length (cadr l)) 1)) (null? (car l)) (null? (cadr l)))
-        ;Si las sublistas solo tienen un subelemento, las unimos
+        ;Si las sublistas solo tienen un subelemento o ninguno, las unimos con merge
         (merge (car l)  (cadr l))
+        ;Si no llamamo a recursivaSplit con los elementos de la izquierda y de la derecha y añadiendolo como lista a la lista final
         (append (list (recursivaSplit (split (car l)))(recursivaSplit (split(cadr l)))))
         )  
     )
-  
+  ;(recursivaSplit '((1 5 2 8 7) (9 3 4 6)));=((((1 7) (2)) (5 8)) ((4 9) (3 6)))
+
+
+;FUNCION QUE REUNE TODOS LOS ELEMENTOS SEPARADOS ANTERIORMENTE POR RECURSIVASPLIT DE MANERA ORDENADA
   (define (recursivaMerge l)
     (if (and (list? (car l)) (list? (cadr l)) (not (list? (car (cadr l)))) (not (list? (car (car l)))))
+        ;Si hemos llegado a dos listas sin sublistas las unimos
         (merge (car l) (cadr l))
         (if (and (list? (car l)) (list? (cadr l)) (not (list? (car (cadr l)))))
-        (merge (recursivaMerge (car l)) (cadr l))
+            ;Si el elemento (car l) sigue teniendo sublistas y elemento (cadr l) no, hacemos merge del resultado de llamar recursivamente con (car l) a la función y (cadr l)
+            (merge (recursivaMerge (car l)) (cadr l))
                 (if (and (list? (car l)) (list? (cadr l)) (not (list? (car (car l)))))
-                            (merge  (car l) (recursivaMerge(cadr l)))
-                            (merge  (recursivaMerge(car l)) (recursivaMerge(cadr l)))
-                            )
+                    ;Si el elemento (cadr l) sigue teniendo sublistas y elemento (car l) no, hacemos merge del resultado de llamar recursivamente con (cadr l) a la función y (car l)
+                    (merge  (car l) (recursivaMerge(cadr l)))
+                    ;Si ambos tienen sublistas, hacemos merge del resultado de llamar a esta función con ambas sublistas
+                    (merge  (recursivaMerge(car l)) (recursivaMerge(cadr l)))
+                    )
                 )
         )
     )
     
     
-        
-        
+                
   (if (null? l)
+      ;Si la lista es nula retornamos una lista vacia
       '()
       (if (= (length l) 1)
+          ;Si la longitud es 1, no hay nada a ordenar y retornamos la lista
           l
           (if (= (length l) 2)
+              ;Si la longitud es 2, ordenamos a los dos elementos
               (merge (list (car l)) (list (cadr l)))
+              ;Si no llamamos a las funciones auxiliares recursivas
               (recursivaMerge (recursivaSplit (split l)))
               )
           )
       )
   )
+;(mergeSort '(-1 43 -6 23 5 45 78  9 3 2 45 -4 28 3 4 5 7 2 1 4 5));=(-6 -4 -1 1 2 2 3 3 4 4 5 5 5 7 9 23 28 43 45 45 78)
+;(mergeSort '());=()
+;(mergeSort '(3 1));=(1 3)
 
+
+;; 
+;; Nombre: mergeSortDatos
+;; Objetivo: Función que ordena n parametros opcionales
+;; Parámetro:
+;;         n numeros opcionales
+;; Resultado: 
+;;         Una lista vacia si no metemos parametros, los elementos ordenados si sí
+;; Funciones a las que llama: Ninguna
+;;
 (define mergeSortDatos
+  ;El unico parametro es una función lambda con parametros opcionales
   (lambda lista
+    ;Llamamos a la función mergesort con los n parametros opcionales
     (mergeSort lista)
     )
   )
+;(mergeSortDatos -1 43 -6 23 5 45 78  9 3 2 45 -4 28 3 4 5 7 2 1 4 5);=(-6 -4 -1 1 2 2 3 3 4 4 5 5 5 7 9 23 28 43 45 45 78)
+;(mergeSortDatos 2 43 1 23 4 6);=(1 2 4 6 23 43)
+;(mergeSortDatos);=()
 
 
+
+;; 
+;; Nombre: listaOrdenada?
+;; Objetivo: Predicado que comprueba si una lista está ordenada
+;; Parámetro:
+;;         l: Lista de números
+;; Resultado: 
+;;         #t si están ordenados, #f si no
+;; Funciones a las que llama: Ninguna
+;;
 (define (listaOrdenada? l)
   (if (or (not (list? l)) (null? l))
+      ;Si o no es una lista o es una lista nula, retornamos #f
       #f
       (if (null? (cdr l))
+          ;Si se ha llegado al último elemento, retornamos #t
           #t
           (if (> (car l) (cadr l))
+              ;Si dos elementos no estan en orden, retornas #f
               #f
+              ;Si no, llamamos recursivamente a la funcion con el resto de elementos de la lista
               (listaOrdenada? (cdr l))
               )
           )
       )
   )
+;(listaOrdenada? '(1 2 4 6 23 43));=#t
+;(listaOrdenada? '(2 -1 4 6 23 43));=#f
+;(listaOrdenada? '());=#f
+;(listaOrdenada? '(42));=#t
 
+
+;; 
+;; Nombre: ordenados?
+;; Objetivo: Predicado que comprueba si n numero opcionales están ordenados
+;; Parámetro:
+;;         n numeros opcionales
+;; Resultado: 
+;;         #t si están ordenados, #f si no
+;; Funciones a las que llama: Ninguna
+;;
 (define ordenados?
+   ;El unico parametro es una función lambda con parametros opcionales
   (lambda lista
+    ;Llamamos a la función listaOrdenada? con los n parametros opcionales    
     (listaOrdenada? lista)
     )
   )
+;(ordenados? -6 -4 -1 1 2 2 3 3 4 4 5 5 5 7 9 23 28 43 45 45 78);=#t
+;(ordenados?);=#f
+;(ordenados? 1 3 4 2);=#f
 
+;; 
+;; Nombre: aplicarLista
+;; Objetivo: Aplica la función f a la lista
+;; Parámetro:
+;;         f: Funcion 
+;;         l: Lista
+;; Resultado: 
+;;         Una lista resultado de aplicar la función  
+;; Funciones a las que llama: Ninguna
+;;
 (define (aplicarLista f l)
   (if (or (not (list? l)) (not (procedure? f)))
+      ;Si o no es una funcion o no es una lista
       '()
       (map f l)
       )
   )
+;(aplicarLista sqrt '(1 2 3 4 5));=(1 1.4142135623730951 1.7320508075688772 2 2.23606797749979)
+;(aplicarLista abs '(1 -2 3 -4 -5));=(1 2 3 4 5)
 
+
+;; 
+;; Nombre: aplicar
+;; Objetivo: Aplica la función f a n parametros numéricos
+;; Parámetro:
+;;         f: Funcion obligatoría
+;;         n numeros opcionales
+;; Resultado: 
+;;         Una lista resultado de aplicar la función  
+;; Funciones a las que llama: Ninguna
+;;
 (define aplicar
+   ;El unico parametro es una función lambda con un parametro obligatorio n parametros opcionales
   (lambda (f . lista)
+    ;Llamamos a la función aplicarLista
     (aplicarLista f lista)
     )
   )
+;(aplicar - 1 2 -1 -2 3);=(-1 -2 1 2 -3)
+;(aplicar - 1 2);=(-1 -2)
