@@ -1,0 +1,2 @@
+define(crear-cancion título  cantante año)
+(list (list 'título   título)(list' cantante cantante)(list' tema   tema)))

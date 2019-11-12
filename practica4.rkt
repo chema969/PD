@@ -360,7 +360,7 @@
         (if (list? (car l))
             ;Si es una sublista, llamo recursivamente dos veces a la fucion, una con la sublista y otra con la lista
             (aux (cdr l) x (append listafinal (list (aux (car l) x '()))))
-            (if (= x (car l))
+            (if (equal? x (car l))
                 ;Si el elemento a mirar de la lista es x, no lo añadimos a la lista final
                 (aux (cdr l) x listafinal)
                 ;Si sí los es, lo añadimos a la lista final
