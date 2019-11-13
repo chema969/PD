@@ -1,6 +1,0 @@
-(define (productoEscalar v1 v2)
-  (if (not (= (vector-length v1) (vector-length v2)))
-      0
-      (do
-          (
-           (n
