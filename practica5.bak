@@ -262,39 +262,6 @@
       )
   )
 
-(define (cargar-canciones fichero)
- 0
- )
-
-(define (grabar-canciones fichero discoteca)
-  (define (aux puerto discoteca)
-    (if (discoteca-vacía? discoteca)
-        (close-output-port puerto)
-        (begin
-          (display "Título: " puerto)
-          (display(ver-título (car discoteca)) puerto)
-          (newline puerto)
-          (display "Cantante: " puerto)
-          (display(ver-cantante (car discoteca)) puerto)
-          (newline puerto)
-          (display"Año: " puerto)
-          (display(ver-año (car discoteca)) puerto)
-          (newline puerto)
-          (aux puerto (cdr discoteca)))
-        )
-      )
-  
-  (let
-      (
-       (puerto (open-output-file fichero))
-       )
-    (if (output-port? puerto)
-        (aux puerto discoteca)
-        (begin (display "No es un puerto") (newline))
-        )
-    )
-  )
-
 (define (programa)
   (define (pedir-opcion)
     (newline)
