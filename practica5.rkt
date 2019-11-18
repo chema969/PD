@@ -1,5 +1,8 @@
 (define(crear-canción título  cantante año)
-(list (list 'título   título)(list' cantante cantante)(list' año año)))
+(list (list 'título   título)
+      (list' cantante cantante)
+      (list' año año))
+  )
 
 
 (define(ver-título cancion)
@@ -219,6 +222,45 @@
   )
 ;;;;;;;;;;;
 
+
+(define (modificar-canción-título! discoteca título nuevo-título)
+  (if (discoteca-vacía? discoteca)
+      (begin (display "La canción no existe") (newline))
+      (if (equal? (ver-título (car discoteca)) título)
+          (cambiar-título! (car discoteca) nuevo-título)
+          (modificar-canción-título! (cdr discoteca) título nuevo-título)
+          )
+      )
+  )
+
+(define (modificar-canción-título! discoteca título cantante)
+  (if (discoteca-vacía? discoteca)
+      (begin (display "La canción no existe") (newline))
+      (if (equal? (ver-título (car discoteca)) título)
+          (cambiar-título! (car discoteca) nuevo-título)
+          (modificar-canción-título! (cdr discoteca) título nuevo-título)
+          )
+      )
+  )
+
+
+(define (modificar-canción-año! discoteca título año)
+  (if (discoteca-vacía? discoteca)
+      (begin (display "La canción no existe") (newline))
+      (if (equal? (ver-título (car discoteca)) título)
+          (cambiar-año! (car discoteca) año)
+          (modificar-canción-año! (cdr discoteca) título año)
+          )
+      )
+  )
+
+
+(define (consultar-canciones discoteca)
+  (if (discoteca-vacía? discoteca)
+      (newline)
+      (begin (consultar-datos-canción (car discoteca)) (consultar-canciones (cdr discoteca)))
+      )
+  )
 
 (define (programa)
   (define (pedir-opcion)
