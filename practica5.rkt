@@ -263,26 +263,48 @@
   )
 
 (define (cargar-canciones fichero)
- 0
- )
+  (let
+      (
+       (puerto (open-input-file fichero))
+       )
+    (if (input-port? puerto)
+        (do
+            (
+             (disco (crear-discoteca) (append disco
+                                         (list (crear-canción título  cantante año)                                                               
+                                                              )
+                                               )
+                                         )
+             ;; Al leer el nombre desde un fichero, le quita las comillas
+             (título (read puerto)  (read puerto))
+             (cantante (read puerto) (read puerto))
+             (año (read puerto)  (read puerto))
+             )
+          ((eof-object? título) disco)
+          )
+        (begin (display "No es un puerto") (newline))
+        )
+    )
+  )
+
 
 (define (grabar-canciones fichero discoteca)
+  (define (poner-comillas texto)
+    (string-append (string #\") texto (string #\"))
+    )
   (define (aux puerto discoteca)
     (if (discoteca-vacía? discoteca)
         (close-output-port puerto)
         (begin
-          (display "Título: " puerto)
-          (display(ver-título (car discoteca)) puerto)
-          (newline puerto)
-          (display "Cantante: " puerto)
-          (display(ver-cantante (car discoteca)) puerto)
-          (newline puerto)
-          (display"Año: " puerto)
+          (display (poner-comillas (ver-título (car discoteca))) puerto)
+          (display " " puerto)
+          (display (poner-comillas (ver-cantante (car discoteca))) puerto)
+          (display" " puerto)
           (display(ver-año (car discoteca)) puerto)
           (newline puerto)
           (aux puerto (cdr discoteca)))
         )
-      )
+    )
   
   (let
       (
@@ -300,10 +322,30 @@
     (newline)
     (display "elige una opción")
     (newline)
-    (display "1 --> raíz cuadrada")
+    (display "1 --> Crear una discoteca.")
     (newline)
-    (display "2 --> seno")
+    (display "2 --> Comprobar si una discoteca está vacía")
     (newline)
+    (display "3 --> Insertar una canción.")
+    (newline)
+    (display "4 --> Consultar una canción.")
+    (newline)
+    (display "5 --> Modificar una canción.")
+    (newline)
+    (display "6 --> Borrar una canción.")
+    (newline)
+    (display "7 --> Borrar todas las canciones de un cantante.")
+    (newline)
+    (display "8 --> Consultar las canciones.")
+    (newline)
+    (display "9 --> Consultar las canciones de un cantante.")
+    (newline)
+    (display "10 --> Consultar las canciones de un año.")
+    (newline)
+    (display "11 --> Cargar las canciones desde un fichero.")
+    (newline)
+    (display "12 --> Grabar las canciones en un fichero.")
+    (newline)    
     (display "0 --> salir")
     (newline)
     (newline)
@@ -311,3 +353,9 @@
     )
   1
   )
+
+
+
+
+
+
