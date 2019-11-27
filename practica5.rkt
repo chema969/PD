@@ -12,8 +12,8 @@
 (define(crear-canción título cantante año)
  ;Crea la lista de asociacion que definirá una canción
 (list (list 'título   título)
-      (list' cantante cantante)
-      (list' año año))
+      (list 'cantante cantante)
+      (list 'año año))
   )
 
 ;; 
@@ -21,21 +21,21 @@
 ;; Objetivo: Retorna el titulo de la canción
 ;;
 (define(ver-título cancion)
-  (cadr(assoc' título cancion)))
+  (cadr(assoc 'título cancion)))
 
 ;; 
 ;; Nombre: ver-cantante
 ;; Objetivo: Retorna el cantante de la canción
 ;;
 (define(ver-cantante cancion)
-  (cadr(assoc' cantante cancion)))
+  (cadr(assoc 'cantante cancion)))
 
 ;; 
 ;; Nombre: ver-año
 ;; Objetivo: Retorna el año de la canción
 ;;
 (define(ver-año cancion)
-  (cadr(assoc' año cancion)))
+  (cadr(assoc 'año cancion)))
 
 ;; 
 ;; Nombre: cambiar-título!
@@ -201,7 +201,7 @@
           ;Si es el cantante que se busca
           #t
           ;Si no, se llama recursivamente
-          (existe-canción-cantante? (cdr discoteca) título)
+          (existe-canción-cantante? (cdr discoteca) cantante)
           )      
       )
   )
@@ -402,7 +402,7 @@
         )
     )
   ;Fin de la función auxiliar
-  (if(existe-canción-cantante? discoteca título)
+  (if(existe-canción-cantante? discoteca cantante)
      
      (aux discoteca cantante (crear-discoteca))
      (begin (display "La canción no existe") (newline))
@@ -411,58 +411,92 @@
 
 ;;
 ;; Nombre: modificar-canción-título!
-;; Objetivo: Borra una canción de una discoteca cuyo título sea este
+;; Objetivo: Cambia el titulo de una canción
 ;; Parámetro:
-;;         discoteca: Discoteca de la que se quiere borrar una cancion
-;;         título: Título de la canción que se quiere borrar
+;;         discoteca: Discoteca de la que se quiere modificar una cancion
+;;         título: Título de la canción que se quiere modificar
+;;         nuevo-título: Nuevo título de la canción
 ;; Resultado: 
-;;        Se elimina la cancion si existe
+;;        Se modifica la cancion si existe
 ;; Funciones a las que llama: ninguna
 ;;
 (define (modificar-canción-título! discoteca título nuevo-título)
-  (if (discoteca-vacía? discoteca)
-      ;Si hemos llegado al final o la discoteca está vacía
-      (begin (display "La canción no existe") (newline))
-      (if (equal? (ver-título (car discoteca)) título)
-          ;Si el titulo es igual, lo cambiamos
-          (cambiar-título! (car discoteca) nuevo-título)
-          (modificar-canción-título! (cdr discoteca) título nuevo-título)
-          )
-      )
+  (define (aux discoteca título nuevo-título toda)
+    (if (discoteca-vacía? discoteca)
+        ;Si hemos llegado al final o la discoteca está vacía
+        (begin (display "La canción no existe") (newline))
+        (if (equal? (ver-título (car discoteca)) título)
+            ;Si el titulo es igual, lo cambiamos y lo volvemos a introducir (para mantener el orden)
+            (let
+                (
+                 (cancionaux (car discoteca))
+                 )
+              (begin
+                (set! toda (borrar-canción-título! toda título))
+                (cambiar-título! cancionaux nuevo-título)
+                (set! toda (insertar-canción! toda cancionaux))
+                toda)
+              )
+            (aux (cdr discoteca) título nuevo-título toda)
+            )
+        )
+    )
+  (aux discoteca título nuevo-título discoteca)
   )
 
 ;;
-;; Nombre: modificar-canción-título!
-;; Objetivo: Borra una canción de una discoteca cuyo título sea este
+;; Nombre: modificar-canción-cantante!
+;; Objetivo: Cambia el cantante de una canción
 ;; Parámetro:
-;;         discoteca: Discoteca de la que se quiere borrar una cancion
-;;         título: Título de la canción que se quiere borrar
+;;         discoteca: Discoteca de la que se quiere modificar una cancion
+;;         título: Título de la canción que se quiere modificar
+;;         cantante: Nuevo cantante de la canción
 ;; Resultado: 
-;;        Se elimina la cancion si existe
-;; Funciones a las que llama: ninguno
+;;        Se modifica el cantante de la cancion si existe
+;; Funciones a las que llama: ninguna
 ;;
 (define (modificar-canción-cantante! discoteca título cantante)
   (if (discoteca-vacía? discoteca)
+       ;Si hemos llegado al final o la discoteca está vacía
       (begin (display "La canción no existe") (newline))
       (if (equal? (ver-título (car discoteca)) título)
+          ;Si el titulo es igual, cambiamos al cantante
           (cambiar-cantante! (car discoteca) cantante)
+          ;Si no llamamos recusivamente
           (modificar-canción-cantante! (cdr discoteca) título cantante)
           )
       )
   )
 
-
+;;
+;; Nombre: modificar-canción-año!
+;; Objetivo: Cambia el año de una canción
+;; Parámetro:
+;;         discoteca: Discoteca de la que se quiere modificar una cancion
+;;         título: Título de la canción que se quiere modificar
+;;         año: Nuevo año de la canción
+;; Resultado: 
+;;        Se modifica el año de la cancion si existe
+;; Funciones a las que llama: ninguna
+;;
 (define (modificar-canción-año! discoteca título año)
   (if (discoteca-vacía? discoteca)
+      ;Si hemos llegado al final o la discoteca está vacía
+
       (begin (display "La canción no existe") (newline))
       (if (equal? (ver-título (car discoteca)) título)
+          ;Si encontramos la canción, cambiamos el año
           (cambiar-año! (car discoteca) año)
+          ;Si no, se llama recursivamente
           (modificar-canción-año! (cdr discoteca) título año)
           )
       )
   )
 
-
+;;
+;; Nombre: consultar-canciones
+;; Objetivo: Funcion de consulta de la discoteca
+;;
 (define (consultar-canciones discoteca)
   (if (discoteca-vacía? discoteca)
       (newline)
@@ -470,28 +504,47 @@
       )
   )
 
+
+;;
+;; Nombre: cargar-canciones
+;; Objetivo: Carga las canciones de un fichero
+;; Parámetro:
+;;         fichero: Fichero del que se quiere leer
+;; Resultado: 
+;;        Una discoteca con las canciones del fichero
+;; Funciones a las que llama: ninguna
+;;
 (define (cargar-canciones fichero)
-  (let
-      (
-       (puerto (open-input-file fichero))
-       )
-    (if (input-port? puerto)
-        (do
-            (
-             (disco (crear-discoteca) (insertar-discoteca! disco
-                                         (list (crear-canción título  cantante año)                                                               
-                                                              )
-                                               )
-                                         )
-             (título (read puerto)  (read puerto))
-             (cantante (read puerto) (read puerto))
-             (año (read puerto)  (read puerto))
-             )
-          ((eof-object? título) disco)
-          )
-        (begin (display "No es un puerto") (newline))
+  (if (string? fichero)
+      (let
+          (
+           ;Guardamos el puerto de entrada
+           (puerto (open-input-file fichero))
+           )
+        ;Cuerpo del let
+        (if (input-port? puerto)
+            ;Si es un puerto de entrada
+            (do
+                (
+                 ;Creamos la discoteca y en cada iteración metemos una cancion
+                 (disco (crear-discoteca) (insertar-canción! disco
+                                                                (crear-canción título  cantante año)                                                                                                             
+                                                               )
+                        )
+                 ;Leemos los distintos parametros de la canción
+                 (título (read puerto)  (read puerto))
+                 (cantante (read puerto) (read puerto))
+                 (año (read puerto)  (read puerto))
+                 )
+              ;Si hemos llegado a la última cancion, salimos devolviendo la discoteca
+              ((eof-object? título) disco)
+              )
+            (begin (display "No es un puerto") (newline))
+            )
         )
-    )
+      ;Si no es un string
+      (display "Debes introducir un string")
+      )
   )
 
 ;;
@@ -503,7 +556,8 @@
 ;; Resultado: 
 ;;        Un fichero con los datos de la discoteca
 ;; Funciones a las que llama:
-;;        poner-comillas
+;;        poner-comillas:Pone comillas a las cadenas
+;;        aux: Crea la discoteca
 ;;
 (define (grabar-canciones fichero discoteca)
   ;Primera función auxiliar
@@ -526,19 +580,21 @@
           (aux puerto (cdr discoteca)))
         )
     )
-  
-  (let
-      (
-       ;Puerto de salida
-       (puerto (open-output-file fichero))
-       )
-    ;Cuerpo del let
-    (if (output-port? puerto)
-        ;Si es un puerto de salida
-        (aux puerto discoteca)
-        (begin (display "No es un puerto") (newline))
+  (if (string? fichero)
+      (let
+          (
+           ;Puerto de salida
+           (puerto (open-output-file fichero))
+           )
+        ;Cuerpo del let
+        (if (output-port? puerto)
+            ;Si es un puerto de salida
+            (aux puerto discoteca)
+            (begin (display "No es un puerto") (newline))
+            )
         )
-    )
+      (display "Debes introducir un string")
+      )
   )
 
 (define (programa)
@@ -546,7 +602,7 @@
     (newline)
     (display "elige una opción")
     (newline)
-    (display "1 --> Crear una discoteca.")
+    (display "1 --> Crear nueva discoteca.")
     (newline)
     (display "2 --> Comprobar si una discoteca está vacía")
     (newline)
@@ -573,13 +629,613 @@
     (display "0 --> salir")
     (newline)
     (newline)
+    ;Leemos la opción 
     (read)
     )
-  1
+   (do
+      (
+       (opcion (pedir-opcion) (pedir-opcion))
+       (discoteca '())
+       )
+     ; condición de salida
+     ( (= opcion 0) (display "Fin del programa") )
+     ; cuerpo del bucle do
+     (cond
+       ;Si queremos crear una discoteca
+       ((= opcion 1)
+        (display "Crear una discoteca")
+        (newline)
+        (set! discoteca (crear-discoteca))
+        )
+       ;Comprueba si la biblioteca está vacía
+       ((= opcion 2)
+        (display "¿Está vacía la discoteca?")
+        (newline)
+        (if (discoteca-vacía? discoteca)
+            ;Si es una discoteca vacía
+            (begin (display "Si") (newline))
+            ;Si no
+            (begin (display "No") (newline))
+            )
+        (newline)
+        )
+       ;Inserta una canción
+       ((= opcion 3)
+        (display "Insertar una canción")
+        (newline)
+        (let
+            (
+             ;Definiciones 
+             (título (begin(display "Inserte el título de la canción(entre comillas):")(read)))
+             (cantante (begin(display "Inserte el cantante(entre comillas):")(read)))
+             (año (begin(display "Inserte el año de la canción:")(read)))
+             )
+          ;Cuerpo del let
+          (set! discoteca (insertar-canción!  discoteca (crear-canción título cantante año)))
+          )
+        )
+       ;Consulta los datos de una canción
+       ((= opcion 4)
+         (display "Consultar una canción")
+         (newline)
+         (let
+            (
+             ;Definiciones del let
+             (título (begin(display "Inserte el título de la canción(entre comillas):")(read)))
+             )
+           ;Cuerpo del let
+           (consultar-canción-título discoteca título)
+           )
+        )
+       ;Modifica los datos de una canción
+       ((= opcion 5)
+        (display "Modificar una canción")
+        (newline)
+        (let
+            (
+             ;Definiciones del let
+             (título (begin(display "Inserte el título de la canción que quieres cambiar(entre comillas):")(read)))
+             (nuevo_titulo (begin(display "Inserte el nuevo título(entre comillas), 0 si no quieres cambiar este dato:")(read)))             
+             (cantante (begin(display "Inserte el nuevo cantante(entre comillas), 0 si no quieres cambiar este dato:")(read)))
+             (año (begin(display "Inserte el año de la canción, 0 si no quieres cambiar este dato:")(read)))
+             )
+          ;Cuerpo del let
+          (if (not (existe-canción-título? discoteca título))
+              ;Si no existe la canción
+              (display "No existe la canción")
+              ;Si existe esta canción
+              (begin
+                (if (and (not (equal? cantante 0)) (string? cantante))
+                    ;Si quieres modificar el cantante
+                    (modificar-canción-cantante! discoteca título cantante)
+                    )
+                (if (not (equal? año 0))
+                    ;Si quieres modificar el año
+                    (modificar-canción-año! discoteca título año)
+                    )
+                (if (and (not (equal? nuevo_titulo 0))(string? nuevo_titulo))
+                    ;Si quieres modificar el título
+                    (set! discoteca (modificar-canción-título! discoteca título nuevo_titulo))
+                    )        
+                )
+              )
+          )
+        )
+       ;Borrar una canción
+       ((= opcion 6)
+        (display "Borrar una canción")
+        (newline)
+        (let
+            (
+             ;Definiciones del let
+             (título (begin(display "Inserte el título de la canción(entre comillas):")(read)))
+             )
+          ;Cuerpo del let
+          (set! discoteca (borrar-canción-título! discoteca título))
+          )
+        )
+       ;Borra toda las canciones de un cantante
+       ((= opcion 7)
+        (display "Borrar todas las canciones de un cantante")
+        (newline)
+        (let
+            (
+             ;Definición del let
+             (cantante (begin(display "Inserte el cantante(entre comillas):")(read)))
+             )
+          ;Cuerpo del let
+          (set! discoteca (borrar-canción-cantante! discoteca cantante))
+          )
+        )
+       ;Consultar todas las canciones
+       ((= opcion 8)
+        (display "Consultar las canciones")
+        (newline)
+        (newline)
+        (consultar-canciones discoteca)
+        )
+       ;Consultar todas las canciones de un cantante
+       ((= opcion 9)
+        (display "Consultar las canciones de un cantante")
+        (newline)
+        (let
+            (
+             ;Definición del let
+             (cantante (begin(display "Inserte el cantante(entre comillas):")(read)))
+             )
+          ;Cuerpo del let
+          (consultar-canción-cantante discoteca cantante)
+          )
+        )
+       ;Consultar las canciones de un año
+       ((= opcion 10)
+        (display "Consultar las canciones de un año")
+        (newline)
+        (let
+            (
+             ;Definiciones del let
+             (año (begin(display "Inserte el año:")(read)))
+             )
+          ;Cuerpo del let
+          (consultar-canción-año discoteca año)
+          )
+        )
+       ;Carga las canciones desde un fichero
+       ((= opcion 11)
+        (display "Cargar las canciones desde un fichero")
+        (let
+            (
+             ;Definiciones del let
+             (fichero (begin(display "Introduce el fichero(entre comillas):")(read)))
+             )
+          ;Cuerpo del let
+          (set! discoteca (cargar-canciones fichero))
+          )
+        )
+       ;Graba las canciones en un fichero
+       ((= opcion 12)
+        (display "Grabar las canciones en un fichero")
+        (let
+            (
+             ;Definiciones del let
+             (fichero (begin(display "Introduce el fichero(entre comillas):")(read)))
+             )
+          ;Cuerpo del let
+          (grabar-canciones fichero discoteca)
+          )
+        )
+       ;Si no es ninguna de las opciones posibles
+       (else
+        (display "Opción errónea")
+        (newline)
+        )
+       )
+     (newline)
+     )
+  )
+
+;;
+;; Nombre: crear_monomio
+;; Objetivo: Crea un monomio de grado n con el valor v
+;;
+(define (crear_monomio grado valor)
+  (if (and (number? grado) (number? valor))
+      (list (list 'grado grado)
+            (list 'valor valor))
+      )
+  )
+
+;;
+;; Nombre: ver_grado
+;; Objetivo: devuelve el grado del monomio
+;;
+(define (ver_grado monomio)
+  (cadr(assoc 'grado monomio))
+  )
+
+;;
+;; Nombre: ver_valor
+;; Objetivo: devuelve el valor del monomio
+;;
+(define (ver_valor monomio)
+  (cadr(assoc 'valor monomio))
+  )
+
+;;
+;; Nombre: sumar_valor!
+;; Objetivo: Suma al monomio el valor nuevo
+;;
+(define(sumar_valor! monomio nuevo)
+  (if (number? nuevo)
+      (set-cdr! (assoc 'valor monomio) (list (+ (ver_valor monomio) nuevo))))
+  )
+
+;;
+;; Nombre: mostrar_monomio
+;; Objetivo: Consulta los datos del monomio
+;;
+(define (mostrar_monomio monomio)
+  (display (ver_valor monomio))
+  (display "x^")       
+  (display (ver_grado monomio)))
+
+;;
+;; Nombre: crear_polinomio
+;; Objetivo: Crea un polinomio vacío
+;;
+(define (crear_polinomio)
+  (list)
+  )
+
+;;
+;; Nombre: polinomio_nulo?
+;; Objetivo: Prueba si el polinomio es nulo
+;; Parámetro:
+;;         polinomio: Polinomio que se quiere evaluar
+;; Resultado: 
+;;        #t si es nulo, #f si no
+;; Funciones a las que llama: ninguna
+;;
+(define (polinomio_nulo? polinomio)
+  (if (null? polinomio)
+      #t
+      #f
+      )
+  )
+
+;;
+;; Nombre: existe_monomio?
+;; Objetivo: Prueba si existe un monomio de un grado en un polinomio
+;; Parámetro:
+;;         polinomio: Polinomio en el que se quiere busca un monomio
+;;         grado: Grado del monomio
+;; Resultado: 
+;;        #t si existe,#f si no
+;; Funciones a las que llama: ninguna
+;;
+(define (existe_monomio? polinomio grado)
+  (if (not (number? grado))
+      ;Si grado no es un número
+      #f
+      (if (null? polinomio)
+          ;Si el polinomio es nulo
+          #f
+          (if (= grado  (ver_grado (car polinomio)))
+              ;Si es el que estamos buscando
+              #t
+              (if (> grado (ver_grado (car polinomio)))
+                  ;Si ya hemos sobrepasado el monomio
+                  #f
+                  ;Si no, llamamos recursivamente
+                  (existe_monomio? (cdr polinomio) grado)
+                  )
+              )
+          )
+      )
+  )
+
+;;
+;; Nombre: sumar_monomio!
+;; Objetivo: Suma un monomio al polinomio
+;; Parámetro:
+;;         polinomio: Polinomio al que se le quiere sumar un monomio
+;;         grado: Grado del monomio
+;;         valor: Valor del monomio
+;; Resultado: 
+;;        Introduce de manera ordenada el monomio al polinomio si este no existia y si existía, suma el valor al monomio. Si este se hace 0, se elimina.
+;; Funciones a las que llama:
+;;        ordenada: Introduce de manera ordenada un monomio
+;;        sumar: Suma al monomio con el grado indicado el valor indicado y si este suma 0, lo eliminamos
+;;
+(define (sumar_monomio! polinomio grado valor)
+  ;Primera funcion auxiliar
+  (define (ordenada polinomio monomio poliyavisto)
+    (if (polinomio_nulo? polinomio)
+        ;Si el polinomio está vacio, significa que hemos llegado al ultimo elemento, por lo que se añade el monomio al final
+        (append poliyavisto (list monomio))
+        (if (< (ver_grado (car polinomio)) (ver_grado monomio))
+            ;Si está en su lugar,lo añadimos
+            (append poliyavisto (list monomio) polinomio)
+            ;Si no, llamamos a la función recursivamente y añadimos el monomio ya visto a poliyavisto
+            (ordenada (cdr polinomio) monomio (append poliyavisto (list (car polinomio))))
+            )
+        )
+    )
+  ;Segunda función auxiliar
+  (define (sumar polinomio grado valor poliyavisto)
+    (if (not(null? polinomio))
+        ;Si no hemos llegado al final del polinomio
+        (if (= grado  (ver_grado (car polinomio)))
+            ;Si el grado es el que estamos buscando, sumamos ambos valores y si es 0, eliminamos el monomio
+            (begin
+              (sumar_valor! (car polinomio) valor) 
+              (if (= (ver_valor (car polinomio)) 0)
+                  (append poliyavisto (cdr polinomio))
+                  (append poliyavisto polinomio)
+                  )
+              )
+            ;Si no, llamamos recursivamente
+            (sumar (cdr polinomio) grado valor (append poliyavisto (list (car polinomio))))  
+            )
+        )
+      )
+  ;Fin de funciones auxiliares
+  (if (and (number? grado) (number? valor))
+      ;Si ambos valores son números
+      (if (not (existe_monomio? polinomio grado))
+          ;Si es un nuevo monomio
+          (ordenada polinomio (crear_monomio grado valor) '())
+          ;Si no lo es
+          (sumar polinomio grado valor '())
+          )
+      )
+  )
+
+;;
+;; Nombre: mostrar_polinomio
+;; Objetivo: Mostrar los monomios de un polinomio
+;; Parámetro:
+;;         polinomio: Polinomio que se quiere mostrar
+;; Resultado: 
+;;        El polinomio se muestra por pantalla
+;; Funciones a las que llama: ninguna
+;;
+(define (mostrar_polinomio polinomio)
+  (if (null? polinomio)
+      ;Si hemos llegado al final o está vacio
+      (newline)
+      ;si no, mostramos por pantalla el monomio y llamamos recursivamente
+      (begin
+        (display "+(")
+        (mostrar_monomio (car polinomio))
+        (display ")")
+        (mostrar_polinomio (cdr polinomio))
+        )
+      )
+  )
+
+;;
+;; Nombre: grabar-polinomio
+;; Objetivo: Guarda los valores de un polinomio en un fichero
+;; Parámetro:
+;;         fichero: Fichero en el que se quiere grabar
+;;         polinomio: Polinomio que se quiere guardar
+;; Resultado: 
+;;        Un fichero con los datos del polinomio
+;; Funciones a las que llama:
+;;        aux: Crea el polimomio
+;;
+(define (grabar-polinomio fichero polinomio)
+  ;Primera función auxiliar
+  (define (aux puerto polinomio)
+    (if (null? polinomio)
+        ;Si es un polinomio vacio, cerramos el puerto
+        (close-output-port puerto)
+        ;Grabamos en el fichero
+        (begin
+          (display (ver_grado (car polinomio)) puerto)
+          (display " " puerto)
+          (display (ver_valor (car polinomio)) puerto)
+          (newline puerto)
+          (aux puerto (cdr polinomio)))
+        )
+    )
+  ;Fin de las funciones auxiliares
+  (if (string? fichero)
+      ;Si es un string
+      (let
+          (
+           ;Puerto de salida
+           (puerto (open-output-file fichero))
+           )
+        ;Cuerpo del let
+        (if (output-port? puerto)
+            ;Si es un puerto de salida
+            (aux puerto polinomio)
+            (begin (display "No es un puerto") (newline))
+            )
+        )
+      (display "Debes introducir un string")
+      )
+  )
+
+;;
+;; Nombre: cargar-polinomio
+;; Objetivo: Carga un polinomio de un fichero
+;; Parámetro:
+;;         fichero: Fichero del que se quiere leer
+;; Resultado: 
+;;        Una polinomio con los valores del fichero
+;; Funciones a las que llama: ninguna
+;;
+(define (cargar-polinomio fichero)
+  (if (string? fichero)
+      (let
+          (
+           ;Guardamos el puerto de entrada
+           (puerto (open-input-file fichero))
+           )
+        ;Cuerpo del let
+        (if (input-port? puerto)
+            ;Si es un puerto de entrada
+            (do
+                (
+                 ;Creamos el polinomio y en cada iteración metemos un monomio
+                 (poli (crear_polinomio) (sumar_monomio! poli grado valor))                                                                                                             
+                 ;Leemos los distintos parametros del monomio
+                 (grado (read puerto)  (read puerto))
+                 (valor (read puerto) (read puerto))
+                 )
+              ;Si hemos llegado al último monomio, salimos devolviendo el polinomio
+              ((eof-object? grado) poli)
+              )
+            (begin (display "No es un puerto") (newline))
+            )
+        )
+      ;Si no es un string
+      (display "Debes introducir un string")
+      )
+  )
+
+;;
+;; Nombre: calcular-valor
+;; Objetivo: Calcula el valor de un polinomio con respecto a una x
+;; Parámetro:
+;;         polinomio: Polinomio del que queremos calcular el valor
+;;         x: Valor para sustituir
+;; Resultado: 
+;;        El valor del polinomio en x
+;; Funciones a las que llama: aux:Función recursiva de cola
+;;
+(define (calcular-valor polinomio x)
+  ;Función auxiliar
+  (define (aux polinomio x valor)
+    (if (null? polinomio)
+        valor
+        (aux (cdr polinomio) x (+ valor (* (ver_valor (car polinomio)) (expt x (ver_grado (car polinomio))))))
+        )
+    )
+  (aux polinomio x 0)
   )
 
 
 
 
-
-
+(define (programa-polinomio)
+  (define (pedir-opcion)
+    (newline)
+    (display "elige una opción")
+    (newline)
+    (display "1 --> Crear nuevo polinomio.")
+    (newline)
+    (display "2 --> Comprobar si un polinomio es nulo")
+    (newline)
+    (display "3 --> Comprobar si existe un monomio.")
+    (newline)
+    (display "4 --> Sumar un monomio al polinomio.")
+    (newline)
+    (display "5 --> Mostrar un polinomio.")
+    (newline)
+    (display "6 --> Cargar un polinomio desde un fichero.")
+    (newline)
+    (display "7 --> Grabar un polinomio en un fichero.")
+    (newline)
+    (display "8 --> Calcular el valor de un polinomio para un dato X.")
+    (newline)    
+    (display "0 --> salir")
+    (newline)
+    (newline)
+    ;Leemos la opción 
+    (read)
+    )
+  (do
+      (
+       (opcion (pedir-opcion) (pedir-opcion))
+       (polinomio '())
+       )
+     ; condición de salida
+     ( (= opcion 0) (display "Fin del programa") )
+     ; cuerpo del bucle do
+     (cond
+       ;Si queremos crear una discoteca
+       ((= opcion 1)
+        (display "Crear un nuevo polinomio")
+        (newline)
+        (set! polinomio (crear_polinomio))
+        )
+       ;Si queremos ver si es un polinomio nulo
+       ((= opcion 2)
+        (display "¿Es un polinomio nulo?")
+        (newline)
+        (if (polinomio_nulo? polinomio)
+            ;Si es un polinomio nulo
+            (begin (display "Si") (newline))
+            ;Si no
+            (begin (display "No") (newline))
+            )
+        (newline)
+        )
+       ;Comprobar si existe un monomio
+       ((= opcion 3)
+        (display "¿Existe el monomio?")
+        (newline)
+        (let
+            (
+             ;Definiciones 
+             (grado (begin(display "Inserte el grado:")(read)))
+             )
+             (if (existe_monomio? polinomio grado)
+                 ;Si es un polinomio nulo
+                 (begin (display "Sí existe el monomio") (newline))
+                 ;Si no
+                 (begin (display "No existe el monomio") (newline))
+             )
+          (newline)
+          )
+        )
+       ;Inserta un monomio
+       ((= opcion 4)
+        (display "Sumar un monomio al polinomio")
+        (newline)
+        (let
+            (
+             ;Definiciones 
+             (grado (begin(display "Inserte el grado:")(read)))
+             (valor (begin(display "Inserte el valor a sumar:")(read)))
+             )
+          ;Cuerpo del let
+          (set! polinomio (sumar_monomio! polinomio grado valor))
+          )
+        )
+       ;Mostrar el polinomio
+       ((= opcion 5)
+        (display "Tu polinomio:")
+        (newline)
+        (mostrar_polinomio polinomio)
+        )
+       ;Cargar un polinomio desde un fichero
+       ((= opcion 6)
+        (display "Cargar las canciones desde un fichero")
+        (let
+            (
+             ;Definiciones del let
+             (fichero (begin(display "Introduce el fichero(entre comillas):")(read)))
+             )
+          ;Cuerpo del let
+          (set! polinomio (cargar-polinomio fichero))
+          )
+        )
+       ;Graba un polinomio en un fichero
+       ((= opcion 7)
+        (display "Grabar las canciones en un fichero")
+        (let
+            (
+             ;Definiciones del let
+             (fichero (begin(display "Introduce el fichero(entre comillas):")(read)))
+             )
+          ;Cuerpo del let
+          (grabar-polinomio fichero polinomio)
+          )
+        )
+       ;Calcular el valor de un polinomio para un dato X
+       ((= opcion 8)
+        (display "valor de un polinomio para un dato X")
+        (newline)
+        (let
+            (
+             ;Definiciones 
+             (x (begin(display "Introduce x:")(read)))
+             )
+          ;Cuerpo del let
+          (display (calcular-valor polinomio x))
+          )
+        )
+       ;Ninguna de las opciones anteriores
+       (else
+        (display "Opción errónea")
+        (newline)
+        )
+       )
+     (newline)
+     )
+  )
