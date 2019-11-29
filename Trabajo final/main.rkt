@@ -63,9 +63,43 @@
 (define (get-rectas punto_corte)
    (cadr(assoc 'rectas punto_corte)))
 
+;;DEFINIMOS EL TAD PAR
+(define (crear-par recta puntoInicial puntoFinal)
+  (list (list 'recta recta)
+      (list 'puntoInicial puntoInicial)
+      (list 'puntoFinal puntoFinal)
+      )
+  )
+
+(define (get-recta par)
+  (cadr(assoc 'recta par)))
+
+(define (get-punto-inicial par)
+  (cadr(assoc 'puntoInicial par)))
+
+(define (get-punto-final par)
+  (cadr(assoc 'puntoFinal par)))
+
+
+;;DEFINIMOS EL TAD AREA
+(define (crear-area indice pares areasAdyacentes)
+  (list (list 'indice indice)
+      (list 'pares pares)
+      (list 'areasAdyacentes areasAdyacentes)
+      )
+  )
+
+(define (get-pares area)
+  (cadr(assoc 'pares area)))
+
+(define (get-indice area)
+  (cadr(assoc 'indice area)))
+
+(define (get-areasAdyacentes area)
+  (cadr (assoc 'areasAdyacentes area)))
 ;Definimos el lugar donde se guardarán las rectas y los puntos de corte
 (define rectas (list ))
-(define puntosDeCruce '())
+(define puntosDeCruce (list  (crear-punto-de-corte '(0 0) '(x0 y0))   (crear-punto-de-corte (list 0 vertical) '(x0 yF))  (crear-punto-de-corte (list horizontal 0) '(xF y0))  (crear-punto-de-corte (list horizontal vertical) '(xF yF)) ))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;          DEFINICIÓN DE LAS FUNCIONES        ;;
 ;;                                             ;;
@@ -286,6 +320,44 @@
   (auxiliar rectas (cdr rectas) limite_x limite_y '())
  )
 
+
+(define (detectarPuntosdeCruceMarco rectas limite_x limite_y)
+  ;FUNCION AUXILIAR
+  (define (auxiliar recta  limite_x limite_y solucion)
+        (if (null? recta)
+            ;Si llegamos al final, devolvemos la solución
+            solucion
+            ;Si no, comprobamos que este punto no se salga de la pantalla
+            (let
+                (
+                 ;Metemos el punto de cruce en la variable punto
+                 (puntox0 (list 0 (valorf (car (get-parametros (car recta))) (cadr (get-parametros (car recta))) (caddr (get-parametros (car recta))) 0)) )
+                 (puntoxF (list limite_x (valorf (car (get-parametros (car recta))) (cadr (get-parametros (car recta))) (caddr (get-parametros (car recta))) limite_x)  ))
+                 (puntoy0 (list (/ (- (caddr (get-parametros (car recta)))) (car (get-parametros (car recta)))) 0))
+                 (puntoyF (list (/ (+ (- (caddr (get-parametros (car recta)))) (- (* (cadr (get-parametros (car recta)) ) limite_y ))) (car (get-parametros (car recta)))) limite_y))
+                 )
+              (begin
+                (if (and (>= (cadr puntox0) 0) (<= (cadr puntox0) limite_y) )
+                    (set! solucion (append solucion (list (crear-punto-de-corte puntox0 (list (get-indice (car recta)) 'x0)))))
+                    )
+                (if (and (>= (cadr puntoxF) 0) (<= (cadr puntoxF) limite_y) )
+                    (set! solucion (append solucion (list (crear-punto-de-corte puntoxF (list (get-indice (car recta)) 'xF)))))
+                    )
+                (if (and (>= (car puntoy0) 0) (<= (car puntoy0) limite_x) )
+                    (set! solucion (append solucion (list (crear-punto-de-corte puntoy0 (list (get-indice (car recta)) 'y0)))))
+                    )
+                (if (and (>= (car puntoyF) 0) (<= (car puntoyF) limite_x) )
+                    (set! solucion (append solucion (list (crear-punto-de-corte puntoyF (list (get-indice (car recta)) 'yF)))))
+                    )
+                (auxiliar (cdr recta)  limite_x limite_y solucion)
+              )
+            )
+        )
+    )
+  ;FIN DE LA FUNCIÓN AUXILIAR
+  (auxiliar rectas  limite_x limite_y '())
+  )
+
 ;;
 ;; Nombre: dibujarPuntosDeCruce
 ;; Objetivo: Función que dibuja los puntos de corte
@@ -326,6 +398,57 @@
   )
 
 
+(define (getPuntos puntos indiceRecta)
+  (define (revisarPuntos indiceRecta indiceRectasPuntosDeCorte)
+    (if (null? indiceRectasPuntosDeCorte)
+        #f
+        (if (equal? (car indiceRectasPuntosDeCorte) indiceRecta)
+            #t
+            (revisarPuntos indiceRecta (cdr indiceRectasPuntosDeCorte))
+            )
+        )
+    )
+            
+  (define (aux punto indiceRecta solucion)
+    (if (null? punto)
+        solucion
+        (if (equal? #t  (revisarPuntos indiceRecta (get-rectas (car punto))))
+            (aux (cdr punto) indiceRecta (append solucion (list (car punto))) )
+            (aux (cdr punto) indiceRecta solucion )
+            )
+        )
+    )
+  (define (ordenar puntos)
+
+    (define (auxiliar puntos menor vistos)
+      (if (null? puntos)
+          (append  (list vistos) (list menor))
+          (if (> (car (get-punto (car puntos))) (car (get-punto menor)))
+              (auxiliar (cdr puntos) (car puntos) (append vistos (list menor)))
+              (auxiliar (cdr puntos) menor (append vistos (list (car puntos))))
+              )
+          )
+      )
+    (define (funcion-ordenacion puntos puntosfinales)
+      (if (null? puntos)
+          puntosfinales
+          (let
+              ((resultado_funcion (auxiliar (cdr puntos) (car puntos) '())))
+            (funcion-ordenacion (car resultado_funcion) (append puntosfinales  (cdr resultado_funcion))
+                                )
+               
+          )
+      )
+      )
+      (funcion-ordenacion puntos '())        
+    )
+  (ordenar (aux puntos indiceRecta '()))
+  )
+       
+
+
+  
+
 ;Definimos el menú principal
 (define menu (new frame% [label "Menú principal"]))
 
@@ -333,15 +456,16 @@
 
 (define (clickenDibujarLineas button event)
   (if (not (null? rectas))
-      (set! rectas (append (list (crear-recta (+ (get-indice (car rectas)) 1) (dibujar-linea v1 click horizontal))) rectas))
-      (set! rectas (append (list (crear-recta 1 (dibujar-linea v1 click horizontal))) rectas))
+      (set! rectas (append (list (crear-recta (+ (get-indice (car rectas)) 1) (dibujar-linea v1 (ready-mouse-click v1) horizontal))) rectas))
+      (set! rectas (append (list (crear-recta 1 (dibujar-linea v1 (ready-mouse-click v1) horizontal))) rectas))
       )
   )
 
 
 (define (clickenPuntosCruce button event)
   (begin
-    (set! puntosDeCruce (detectarPuntosdeCruce rectas horizontal vertical))
+    (set! puntosDeCruce (append puntosDeCruce (detectarPuntosdeCruce rectas horizontal vertical)))
+    (set! puntosDeCruce (append puntosDeCruce (detectarPuntosdeCruceMarco rectas horizontal vertical))) 
     (dibujarPuntosDeCruce v1 puntosDeCruce)
     )
   )
