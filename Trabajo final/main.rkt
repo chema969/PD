@@ -100,6 +100,7 @@
 ;Definimos el lugar donde se guardarán las rectas y los puntos de corte
 (define rectas (list ))
 (define puntosDeCruce (list  (crear-punto-de-corte '(0 0) '(x0 y0))   (crear-punto-de-corte (list 0 vertical) '(x0 yF))  (crear-punto-de-corte (list horizontal 0) '(xF y0))  (crear-punto-de-corte (list horizontal vertical) '(xF yF)) ))
+(define conjuntopares (list))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;          DEFINICIÓN DE LAS FUNCIONES        ;;
 ;;                                             ;;
@@ -316,7 +317,7 @@
         )
     )
 
-  ;FIN DE LAS FUNCIONES AUXILIARES
+  ;FIN DE LAS FUNCION AUXILIAR
   (auxiliar rectas (cdr rectas) limite_x limite_y '())
  )
 
@@ -330,7 +331,7 @@
             ;Si no, comprobamos que este punto no se salga de la pantalla
             (let
                 (
-                 ;Metemos el punto de cruce en la variable punto
+                 ;Metemos
                  (puntox0 (list 0 (valorf (car (get-parametros (car recta))) (cadr (get-parametros (car recta))) (caddr (get-parametros (car recta))) 0)) )
                  (puntoxF (list limite_x (valorf (car (get-parametros (car recta))) (cadr (get-parametros (car recta))) (caddr (get-parametros (car recta))) limite_x)  ))
                  (puntoy0 (list (/ (- (caddr (get-parametros (car recta)))) (car (get-parametros (car recta)))) 0))
@@ -425,7 +426,13 @@
           (append  (list vistos) (list menor))
           (if (> (car (get-punto (car puntos))) (car (get-punto menor)))
               (auxiliar (cdr puntos) (car puntos) (append vistos (list menor)))
-              (auxiliar (cdr puntos) menor (append vistos (list (car puntos))))
+              (if (= (car (get-punto (car puntos))) (car (get-punto menor)))
+                  (if (> (cadr (get-punto (car puntos))) (cadr (get-punto menor)))
+                      (auxiliar (cdr puntos) (car puntos) (append vistos (list menor)))
+                      (auxiliar (cdr puntos) menor (append vistos (list (car puntos))))
+                      )
+                  (auxiliar (cdr puntos) menor (append vistos (list (car puntos))))
+                  )
               )
           )
       )
@@ -445,9 +452,72 @@
   (ordenar (aux puntos indiceRecta '()))
   )
        
+(define (pares puntosRecta indiceRecta solucion)
+  (if (null? puntosRecta)
+      solucion
+      (if (null? (cdr puntosRecta))
+          solucion
+          (pares (cdr puntosRecta) indiceRecta  (append  solucion (list (crear-par indiceRecta (car puntosRecta)  (cadr puntosRecta))))
+                 )
+          )
+      )
+  )
+
+(define (getPares rectas puntos)
+  ;PRIMERA FUNCION AUXILIAR
+  (define (recorrerRectas rectas puntos solucion)
+    (if (null? rectas)
+        solucion
+        (recorrerRectas (cdr rectas) puntos (append solucion (pares (getPuntos puntos (get-indice (car rectas))) (car rectas) '())))
+        )
+    )
+    (recorrerRectas rectas puntos '())
+
+  )
 
 
-  
+(define (getParesEjes puntos)
+  (define (recorrerRectas rectas puntos solucion)
+    (if (null? rectas)
+        solucion
+        (recorrerRectas (cdr rectas) puntos (append solucion (pares (getPuntos puntos (car rectas)) (car rectas) '())))
+        )
+    )
+    (recorrerRectas (list 'x0 'xF 'y0 'yF) puntos  '())
+  )
+
+
+(define (getAreas pares)
+  (define (puntoEnComun? par1 par2)
+    (if (or (equal? (get-punto-inicial par1) (get-punto-inicial par2))(equal? (get-punto-inicial par1) (get-punto-final par2)) (equal? (get-punto-final par1) (get-punto-inicial par2)) (equal? (get-punto-final par1) (get-punto-final par2)))
+        #t
+        #f
+        )
+    )
+  (define (evaluarAreas par conjuntoParesPorVer solucion indice)
+
+    ;FUNCION AUXILIAR
+    (define (evaluarUnParConElResto par conjuntoPares solucion )
+      (if (null? conjuntoPares)
+          solucion
+          (if (and (puntoEnComun? par (car conjuntoPares)) (not (equal? (get-recta par) (get-recta (car conjuntoPares)))))
+              (evaluarUnParConElResto par (cdr conjuntoPares) (append solucion  (list (car conjuntoPares))))
+              (evaluarUnParConElResto par (cdr conjuntoPares) solucion)
+              )
+          )
+      )
+    ;FIN DE LA FUNCION AUXILIAR
+    (if (null? conjuntoParesPorVer)
+        solucion
+        (evaluarAreas (car conjuntoParesPorVer) (cdr conjuntoParesPorVer) (append solucion (crear-area indice (append par (evaluarUnParConElResto par conjuntoParesPorVer '())) '()) ) (+ 1 indice)) ;
+         )
+    )
+  ;FIN DE LAS FUNCIONES AUXILIARES
+  (evaluarAreas (car pares) (cdr pares) '() 1)
+)
+
+
+
 
 ;Definimos el menú principal
 (define menu (new frame% [label "Menú principal"]))
@@ -467,6 +537,7 @@
     (set! puntosDeCruce (append puntosDeCruce (detectarPuntosdeCruce rectas horizontal vertical)))
     (set! puntosDeCruce (append puntosDeCruce (detectarPuntosdeCruceMarco rectas horizontal vertical))) 
     (dibujarPuntosDeCruce v1 puntosDeCruce)
+    (set! conjuntopares (append (getParesEjes puntosDeCruce) (getPares rectas puntosDeCruce)))
     )
   )
 
