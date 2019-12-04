@@ -488,12 +488,14 @@
 
 
 (define (getAreas pares)
+  
   (define (puntoEnComun? par1 par2)
     (if (or (equal? (get-punto-inicial par1) (get-punto-inicial par2))(equal? (get-punto-inicial par1) (get-punto-final par2)) (equal? (get-punto-final par1) (get-punto-inicial par2)) (equal? (get-punto-final par1) (get-punto-final par2)))
         #t
         #f
         )
     )
+  
   (define (evaluarAreas par conjuntoPares solucion)
 
     ;FUNCION AUXILIAR
@@ -513,17 +515,105 @@
          )
     )
 
+  
+  (define (esta-a-la-derecha? par1 par2)
+    (if (equal? (get-punto-inicial par1) (get-punto-inicial par2))
+        (> (cadr (get-punto (get-punto-final  par2))) (valorf (car (get-parametros (get-recta par1))) (cadr (get-parametros (get-recta par1))) (caddr (get-parametros (get-recta par1))) (car (get-punto (get-punto-final  par2)))))
+        (if (equal? (get-punto-inicial par1) (get-punto-final par2))
+            (> (cadr (get-punto (get-punto-inicial  par2))) (valorf (car (get-parametros (get-recta par1))) (cadr (get-parametros (get-recta par1))) (caddr (get-parametros (get-recta par1))) (car (get-punto (get-punto-inicial  par2)))))
+            (if (equal? (get-punto-final par1) (get-punto-inicial par2))
+                (> (cadr (get-punto (get-punto-final  par2))) (valorf (car (get-parametros (get-recta par1))) (cadr (get-parametros (get-recta par1))) (caddr (get-parametros (get-recta par1))) (car (get-punto (get-punto-final  par2)))))
+                (> (cadr (get-punto (get-punto-inicial  par2))) (valorf (car (get-parametros (get-recta par1))) (cadr (get-parametros (get-recta par1))) (caddr (get-parametros (get-recta par1))) (car (get-punto (get-punto-inicial  par2)))))
+                )
+            )
+        )
+    )
+        
+  (define (separa par puntos-cruzados subpuntosIzq subpuntosDer)
+    (if (null? puntos-cruzados)
+        (append (list subpuntosIzq) (list subpuntosDer))
+        (if (esta-a-la-derecha? par (car puntos-cruzados))
+            (separa par (cdr puntos-cruzados) subpuntosIzq (append subpuntosDer (list (car puntos-cruzados) )))
+            (separa par (cdr puntos-cruzados) (append subpuntosIzq (list(car puntos-cruzados) )) subpuntosDer)
+            )
+        )
+    )
   (define (separar puntos-cruzados solucion)
     (if (null? puntos-cruzados)
         solucion
-        (if (> (length (car puntos-cruzados)) 3)
-            
+        (if (>= 3 (length (car puntos-cruzados)))
+            (separar (cdr puntos-cruzados) (append solucion (list (car puntos-cruzados))))
+            (separar (cdr puntos-cruzados) (append solucion (separa (car (car puntos-cruzados)) (cdr (car puntos-cruzados)) (list (car (car puntos-cruzados))) (list (car (car puntos-cruzados))))))
+            )
+        )
+    )
+
+
+  (define (coincidencias conjunto1 conjunto2)
+    (define (aux c1 c2 copioc2 numerodecoincidencias)
+      (if (null? c1)
+          numerodecoincidencias
+          (if (null? c2)
+              (aux (cdr c1) copioc2 copioc2 numerodecoincidencias)
+              (if (equal? (car c1) (car c2))
+                  (aux (cdr c1) copioc2 copioc2 (+ numerodecoincidencias 1))
+                  (aux c1 (cdr c2) copioc2 numerodecoincidencias)
+                  )
+              )
+          )
+      )
+    (aux conjunto1 conjunto2 conjunto2 0)
+    )
+  
+
+    
+    
+    
+  (define (union-de-areas conjunto)
+    (define (uniondedosconjuntos c1 c2)
+    
+      (define (existe? par c1)
+        (if (null? c1)
+            #f
+            (if (equal? par (car c1))
+                #t
+                (existe? par (cdr c1))
+                )
+            )
+        )
+              
+      (define (aux c1 c2 solucion)
+        (if (null? c1)
+            (append solucion c2)             
+            (if (not (existe? (car c1)  c2))
+                (aux (cdr c1) c2  (append solucion (list(car c1))))
+                (aux (cdr c1) c2 solucion)
+                )
+            )
+        )
+      (aux c1 c2 '())
+      )
+    (define (unir-conjuntos conjunto restoConjuntos solucion novistos)
+      ;(display "CONJUNTO:")(display conjunto)(newline)(newline)(display "RESTO:")(display restoConjuntos)(newline)(newline)(display "SOLUCION:")(display solucion)(newline)(newline)(display "NOVISTO:")(display novistos)(newline)(newline)
+      (if (and (null? restoConjuntos) (null? novistos))
+          (append solucion (list conjunto))
+          (if (null? restoConjuntos)
+              (unir-conjuntos (car novistos) (cdr novistos) (append solucion (list conjunto)) '())
+              (if (>= (coincidencias conjunto (car restoConjuntos)) 2)
+                  (unir-conjuntos (uniondedosconjuntos  conjunto (car restoConjuntos)) (append (cdr restoConjuntos) novistos) solucion '())
+                  (unir-conjuntos conjunto (cdr restoConjuntos) solucion (append novistos (list(car restoConjuntos))))
+                  )
+              )
+          )
+      )
+    (unir-conjuntos (car conjunto) (cdr conjunto) '() '() )
+    )
   ;FIN DE LAS FUNCIONES AUXILIARES
   (let
       (
        (puntos-cruzados (evaluarAreas pares pares '()))
        )
-    (separar puntos-cruzados '())
+    (union-de-areas (separar puntos-cruzados '()))
     )
 )
 
