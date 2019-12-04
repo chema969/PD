@@ -494,7 +494,7 @@
         #f
         )
     )
-  (define (evaluarAreas par conjuntoParesPorVer solucion indice)
+  (define (evaluarAreas par conjuntoPares solucion)
 
     ;FUNCION AUXILIAR
     (define (evaluarUnParConElResto par conjuntoPares solucion )
@@ -507,13 +507,24 @@
           )
       )
     ;FIN DE LA FUNCION AUXILIAR
-    (if (null? conjuntoParesPorVer)
+    (if (null? par)
         solucion
-        (evaluarAreas (car conjuntoParesPorVer) (cdr conjuntoParesPorVer) (append solucion (crear-area indice (append par (evaluarUnParConElResto par conjuntoParesPorVer '())) '()) ) (+ 1 indice)) ;
+        (evaluarAreas (cdr par) conjuntoPares (append solucion (list (append (list (car par)) (evaluarUnParConElResto (car par) conjuntoPares '())) ) )) ;
          )
     )
+
+  (define (separar puntos-cruzados solucion)
+    (if (null? puntos-cruzados)
+        solucion
+        (if (> (length (car puntos-cruzados)) 3)
+            
   ;FIN DE LAS FUNCIONES AUXILIARES
-  (evaluarAreas (car pares) (cdr pares) '() 1)
+  (let
+      (
+       (puntos-cruzados (evaluarAreas pares pares '()))
+       )
+    (separar puntos-cruzados '())
+    )
 )
 
 
