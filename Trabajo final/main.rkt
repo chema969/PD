@@ -82,25 +82,32 @@
 
 
 ;;DEFINIMOS EL TAD AREA
-(define (crear-area indice pares areasAdyacentes)
+(define (crear-area indice pares areasAdyacentes color)
   (list (list 'indice indice)
       (list 'pares pares)
       (list 'areasAdyacentes areasAdyacentes)
+      (list 'color color)
       )
   )
 
 (define (get-pares area)
   (cadr(assoc 'pares area)))
 
-(define (get-indice area)
+(define (get-indice-area area)
   (cadr(assoc 'indice area)))
 
 (define (get-areasAdyacentes area)
   (cadr (assoc 'areasAdyacentes area)))
+
+(define (get-color area)
+  (cadr (assoc 'color area)))
+
+
 ;Definimos el lugar donde se guardarán las rectas y los puntos de corte
 (define rectas (list ))
 (define puntosDeCruce (list  (crear-punto-de-corte '(0 0) '(x0 y0))   (crear-punto-de-corte (list 0 vertical) '(x0 yF))  (crear-punto-de-corte (list horizontal 0) '(xF y0))  (crear-punto-de-corte (list horizontal vertical) '(xF yF)) ))
 (define conjuntopares (list))
+(define areas (list))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;          DEFINICIÓN DE LAS FUNCIONES        ;;
 ;;                                             ;;
@@ -594,7 +601,6 @@
       (aux c1 c2 '())
       )
     (define (unir-conjuntos conjunto restoConjuntos solucion novistos)
-      ;(display "CONJUNTO:")(display conjunto)(newline)(newline)(display "RESTO:")(display restoConjuntos)(newline)(newline)(display "SOLUCION:")(display solucion)(newline)(newline)(display "NOVISTO:")(display novistos)(newline)(newline)
       (if (and (null? restoConjuntos) (null? novistos))
           (append solucion (list conjunto))
           (if (null? restoConjuntos)
@@ -608,16 +614,125 @@
       )
     (unir-conjuntos (car conjunto) (cdr conjunto) '() '() )
     )
+
+  
+  (define (crear-areas conjunto-pares indice solucion)
+    (if (null? conjunto-pares)
+        solucion
+        (crear-areas (cdr conjunto-pares) (+ 1 indice) (append solucion (list(crear-area indice (car conjunto-pares) '() 0))))
+        )
+    )
+
+  (define (añadir-adyacentes areas)
+    (define (auxiliar area1 area2 solucion)
+      (if (null? area2)
+          solucion
+          (if (and (>= (coincidencias (get-pares area1) (get-pares (car area2))) 1) (not (equal? area1 (car area2))))
+              (auxiliar area1 (cdr area2) (append solucion (list (get-indice-area (car area2)))))
+              (auxiliar area1 (cdr area2) solucion)
+              )
+          )
+      )
+
+    (define (auxiliar2 area1 areas solucion)
+      (if (null? area1)
+          solucion
+          (auxiliar2 (cdr area1) areas (append solucion (list(auxiliar (car area1) areas '()))))
+          )
+      )
+
+    (define (areas-con-adyacentes adyacentes areas solucion)
+      (if (null? adyacentes)
+          solucion
+          (areas-con-adyacentes (cdr adyacentes) (cdr areas) (append solucion (list(crear-area (get-indice-area (car areas)) (get-pares(car areas)) (car adyacentes) 0))))
+          )
+      )
+     (areas-con-adyacentes (auxiliar2 areas areas '()) areas '())
+    )
+    
   ;FIN DE LAS FUNCIONES AUXILIARES
   (let
       (
        (puntos-cruzados (evaluarAreas pares pares '()))
        )
-    (union-de-areas (separar puntos-cruzados '()))
+    (añadir-adyacentes(crear-areas (union-de-areas (separar puntos-cruzados '())) 1 '()))
     )
 )
 
 
+(define (pintar-area area color ventana)
+  
+  ;(define (existe-punto? punto conjunto-puntos)
+  ;  (if (null? conjunto-puntos)
+  ;      #f
+  ;      (if (equal? punto (car conjunto-puntos))
+  ;          #t
+  ;          (existe-punto? punto (cdr conjunto-puntos))
+  ;          )
+  ;      )
+  ;  )
+  
+ ; (define (get-puntos pares soluciones)
+ ;  (if (null? pares)
+ ;       soluciones
+ ;       (let
+ ;          (
+ ;           (punto-inicial (existe-punto? (get-punto-inicial (car pares)) soluciones))
+ ;            (punto-final (existe-punto? (get-punto-final (car pares)) soluciones))
+ ;            )
+ ;         (if (and (not punto-inicial) (not punto-final))
+ ;             (get-puntos (cdr pares) (append soluciones (list(get-punto-inicial (car pares))) (list(get-punto-final (car pares)))))
+ ;             (if (not punto-inicial)
+ ;                 (get-puntos (cdr pares) (append soluciones (list(get-punto-inicial (car pares)))))
+ ;                 (if (not punto-final)
+ ;                    (get-puntos (cdr pares) (append soluciones (list(get-punto-final (car pares)))))
+ ;                    (get-puntos (cdr pares) soluciones)
+ ;                    )
+ ;                )
+ ;            )
+ ;        )
+ ;      )
+ ;  )
+
+
+  (define (get-puntos pares)
+    (define (getSiguientePunto pares punto paresfinales)
+      (if (and (not (equal? punto (get-punto-inicial (car pares)))) (not (equal? punto (get-punto-final (car pares)))))
+          (getSiguientePunto (cdr pares) punto (append paresfinales (list (car pares))))
+          (if (equal? punto (get-punto-inicial (car pares)))
+              (append (list (get-punto-final (car pares)))  (append paresfinales (cdr pares)))
+              (append (list (get-punto-inicial (car pares))) (append paresfinales (cdr pares)))
+              )
+          )
+      )
+    
+    (define (aux pares siguientePunto soluciones)
+      (if (null? pares)
+          (append soluciones (list siguientePunto))
+          (let
+              (
+               (puntosyPares (getSiguientePunto pares siguientePunto '()))
+               )
+            (aux (cdr puntosyPares) (car puntosyPares) (append soluciones (list siguientePunto)))
+            )
+          )
+      )
+    (aux (cdr pares) (get-punto-inicial (car pares))  (list(get-punto-final (car pares))))
+    )
+             
+  (define (lista-de-make-posn puntos solucion)
+    (if (null? puntos)
+        solucion
+        (lista-de-make-posn (cdr puntos) (append solucion (list(make-posn (car(get-punto (car puntos))) (cadr(get-punto (car puntos))))) ))
+        )
+    )
+  (let
+      (
+      (listaposn (lista-de-make-posn (get-puntos (get-pares area) ) '()))
+      )
+  ((draw-solid-polygon ventana) listaposn (make-posn 0 0)  color)
+    )
+)
 
 
 ;Definimos el menú principal
