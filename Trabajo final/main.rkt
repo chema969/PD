@@ -4,7 +4,7 @@
 
 ;; Carga la bilioteca de graficos
 (require (lib "graphics.ss" "graphics"))
-
+(require rnrs/mutable-pairs-6)
 ;; Inicializar los graficos
 (open-graphics)
 
@@ -107,7 +107,8 @@
 (define rectas (list ))
 (define puntosDeCruce (list  (crear-punto-de-corte '(0 0) '(x0 y0))   (crear-punto-de-corte (list 0 vertical) '(x0 yF))  (crear-punto-de-corte (list horizontal 0) '(xF y0))  (crear-punto-de-corte (list horizontal vertical) '(xF yF)) ))
 (define conjuntopares (list))
-(define areas (list))
+(define areasDefinidas (list))
+(define color (list "blue" "yellow" "green" "red" "cyan" "brown" "magenta"))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;          DEFINICIÓN DE LAS FUNCIONES        ;;
 ;;                                             ;;
@@ -661,39 +662,6 @@
 
 
 (define (pintar-area area color ventana)
-  
-  ;(define (existe-punto? punto conjunto-puntos)
-  ;  (if (null? conjunto-puntos)
-  ;      #f
-  ;      (if (equal? punto (car conjunto-puntos))
-  ;          #t
-  ;          (existe-punto? punto (cdr conjunto-puntos))
-  ;          )
-  ;      )
-  ;  )
-  
- ; (define (get-puntos pares soluciones)
- ;  (if (null? pares)
- ;       soluciones
- ;       (let
- ;          (
- ;           (punto-inicial (existe-punto? (get-punto-inicial (car pares)) soluciones))
- ;            (punto-final (existe-punto? (get-punto-final (car pares)) soluciones))
- ;            )
- ;         (if (and (not punto-inicial) (not punto-final))
- ;             (get-puntos (cdr pares) (append soluciones (list(get-punto-inicial (car pares))) (list(get-punto-final (car pares)))))
- ;             (if (not punto-inicial)
- ;                 (get-puntos (cdr pares) (append soluciones (list(get-punto-inicial (car pares)))))
- ;                 (if (not punto-final)
- ;                    (get-puntos (cdr pares) (append soluciones (list(get-punto-final (car pares)))))
- ;                    (get-puntos (cdr pares) soluciones)
- ;                    )
- ;                )
- ;            )
- ;        )
- ;      )
- ;  )
-
 
   (define (get-puntos pares)
     (define (getSiguientePunto pares punto paresfinales)
@@ -733,8 +701,84 @@
   ((draw-solid-polygon ventana) listaposn (make-posn 0 0)  color)
     )
 )
+;;;;;;;;;;;;;ALGORITMOS DE COLOREADO;;;;;;;;;;;;;;;;;;;;
+
+(define (getColoresNoPosibles areas areasAdyacentes solucion)
+  (if (null? areasAdyacentes)
+      solucion
+      (if (equal? (get-indice-area (car areas)) (car areasAdyacentes) )
+          (getColoresNoPosibles (cdr areas) (cdr areasAdyacentes) (append solucion (list (get-color (car areas)))))
+          (getColoresNoPosibles (cdr areas) areasAdyacentes solucion)
+          )
+      )
+  )
+
+(define (estaColor? coloresNoPosibles color)
+  (if (null? coloresNoPosibles)
+      #f
+      (if (equal? color (car coloresNoPosibles))
+          #t
+          (estaColor? (cdr coloresNoPosibles) color)
+          )
+      )
+  )
+    
+(define (getProximosColor coloresNoPosibles colores)
+  (if (not (estaColor? coloresNoPosibles (car colores)))
+      (car colores)
+      (getProximosColor coloresNoPosibles (cdr colores))
+      )
+  )
+
+(define (colorearVoraz areas colores ventana)
+ 
+  (define (iterarAreas areas colores ventana todaslasAreas areasYaVistas)
+    (if (null? areas)
+        todaslasAreas
+        (let
+            (
+             (colorfinal (getProximosColor (getColoresNoPosibles todaslasAreas (get-areasAdyacentes (car areas)) '()) colores))
+             )
+          (begin
+            (pintar-area (car areas) colorfinal ventana)
+            (sleep 1) 
+            (iterarAreas (cdr areas) colores ventana (append  areasYaVistas (list (crear-area (get-indice-area (car areas)) (get-pares (car areas)) (get-areasAdyacentes (car areas)) colorfinal))  (cdr areas)) (append areasYaVistas (list (crear-area (get-indice-area (car areas)) (get-pares (car areas)) (get-areasAdyacentes (car areas)) colorfinal))))
+            )            
+          )        
+        )
+    )
+  (iterarAreas  areas colores ventana areas '())
+
+)
 
 
+(define (colorearBacktracking areas colores ventana)
+
+    
+   (define (getProximosColor coloresNoPosibles colores)
+     (if (not (estaColor? coloresNoPosibles (car colores)))
+         (car colores)
+         (getProximosColor coloresNoPosibles (cdr colores))
+         )
+     )
+  (define (iterarAreas areas colores ventana todaslasAreas areasYaVistas)
+    (if (null? areas)
+        todaslasAreas
+        (let
+            (
+             (colorfinal (getProximosColor (getColoresNoPosibles todaslasAreas (get-areasAdyacentes (car areas)) '()) colores))
+             )
+          (begin
+            (pintar-area (car areas) colorfinal ventana)
+            (sleep 1) 
+            (iterarAreas (cdr areas) colores ventana (append  areasYaVistas (list (crear-area (get-indice-area (car areas)) (get-pares (car areas)) (get-areasAdyacentes (car areas)) colorfinal))  (cdr areas)) (append areasYaVistas (list (crear-area (get-indice-area (car areas)) (get-pares (car areas)) (get-areasAdyacentes (car areas)) colorfinal))))
+            )            
+          )        
+        )
+    )
+  (iterarAreas  areas colores ventana areas '())
+
+)
 ;Definimos el menú principal
 (define menu (new frame% [label "Menú principal"]))
 
@@ -754,6 +798,7 @@
     (set! puntosDeCruce (append puntosDeCruce (detectarPuntosdeCruceMarco rectas horizontal vertical))) 
     (dibujarPuntosDeCruce v1 puntosDeCruce)
     (set! conjuntopares (append (getParesEjes puntosDeCruce) (getPares rectas puntosDeCruce)))
+    (set! areasDefinidas (getAreas conjuntopares)) 
     )
   )
 
@@ -762,10 +807,20 @@
     (borrarPuntosDeCruce v1 puntosDeCruce)
   )
 
+(define (clickenGreedy button event)
+  (begin
+    (set! puntosDeCruce (append puntosDeCruce (detectarPuntosdeCruce rectas horizontal vertical)))
+    (set! puntosDeCruce (append puntosDeCruce (detectarPuntosdeCruceMarco rectas horizontal vertical))) 
+    (set! conjuntopares (append (getParesEjes puntosDeCruce) (getPares rectas puntosDeCruce)))
+    (set! areasDefinidas (getAreas conjuntopares))
+    (set! areasDefinidas (colorearVoraz areasDefinidas color v1)) 
+    )
+  )
 ;Definimos los botones
 (define botonLineas (new button% [parent menu] [label "Dibujar nuevas lineas"] [callback clickenDibujarLineas]))
 (define botonLineas (new button% [parent menu] [label "Mostrar puntos de cruce"] [callback clickenPuntosCruce]))
 (define botonLineas (new button% [parent menu] [label "Borrar puntos de cruce"] [callback clickenBorrarPuntosCruce]))
+(define botonLineas (new button% [parent menu] [label "Realizar algoritmo voraz"] [callback clickenGreedy]))
 ;; Mostrar menú
 (send menu show #t)  
   
