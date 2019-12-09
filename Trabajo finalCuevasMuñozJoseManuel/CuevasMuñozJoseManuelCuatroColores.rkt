@@ -268,19 +268,7 @@
 ;; Funciones a las que llama: ninguna
 ;;
 (define (dibujar-linea v1 click tamaño)
-  ;FUNCIÓN AUXILIAR
-  (define (rectadospuntos x1 y1 x2 y2)
-    ;Calculamos los parametros a, b y c de la recta
-    (let(
-         (a (- y2 y1))
-         (b (- x1 x2))
-         (c (- (* y1 x2) (* x1 y2)))
-         )
-      ;Retorna la recta
-      (list a b c))
-    )
-  
-  ;FIN DE LA FUNCION AUXILIAR
+
   (let
       (
        ;Detecta los puntos que van a definir la recta (Pedido por el usuario)
@@ -1067,6 +1055,7 @@
 
 ;Realiza el algoritmo de coloreado voraz
 (define (clickenGreedy button event)
+  
   (begin
     ;Resetea los puntos de cruce dejando solo los de las esquinas
     (set! puntosDeCruce (list  (crear-punto-de-corte '(0 0) '(x0 y0))   (crear-punto-de-corte (list 0 vertical) '(x0 yF))  (crear-punto-de-corte (list horizontal 0) '(xF y0))  (crear-punto-de-corte (list horizontal vertical) '(xF yF)) ))
