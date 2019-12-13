@@ -25,5 +25,20 @@ lector(nombre("Andrea", "Duque","Soto"),mujer,25).
 lector(nombre("Jesus", "Lasa", "Chacón"),hombre,22).
 lector(nombre("Juan", "Garrido", "Torres"),hombre,61).
 
-%bagof(N,R^NN^S^D^lector(nombre(R,N,NN),S,D),Cs).
 
+contar([],0).
+
+contar([_|Cola],R):-
+	contar(Cola,R1),
+	R is R1+1.
+
+apellidos(Lector,N):-
+	lector(nombre(Lector,N,_),_,_).
+
+apellidos(Lector,N):-
+	lector(nombre(Lector,_,N),_,_).
+
+apellido_repetido(N):-
+	bagof(Lector,N^apellidos(Lector,N),Cs),
+	contar(Cs,R),
+	R>1.
