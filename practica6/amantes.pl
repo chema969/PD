@@ -52,10 +52,33 @@ ama(isabel,luis).
 	Y = juan ;
 
 */
+
+/*
+amantes(X,Y)
+Predicado que comprueba si dos personas se aman entre sí
+Argumentos
++ X:
+- Significado: primera persona
+- Tipo: entrada y salida
++ Y:
+- Significado: segunda persona
+- Tipo: entrada y salida
+*/
 amantes(X,Y):-
 	ama(X,Y),
 	ama(Y,X).
 
+/*
+no_correspondido(X,Y)
+Predicado que comprueba si una persona tiene un amor no correspondido
+Argumentos
++ X:
+- Significado: primera persona
+- Tipo: entrada y salida
++ Y:
+- Significado: segunda persona
+- Tipo: entrada y salida
+*/
 no_correspondido(X,Y):-
 	ama(X,Y),
 	not(ama(Y,X)).
