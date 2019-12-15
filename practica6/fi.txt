@@ -1,1 +1,0 @@
-persona(carla,jurado,guerra)persona(andrea,jurado,guerra)persona(jose,jurado,guerra)
